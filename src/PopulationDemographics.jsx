@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 // ── DESIGN TOKENS (matching LighthouseCompanies) ────────────────────────────
 const C = {
@@ -1604,54 +1606,71 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
   );
 }
 
-// ── DEMOGRAPHIC MAP ─────────────────────────────────────────────────────────
-// Self-contained choropleth: simplified country polygons on an equirectangular
-// projection, shaded by a chosen metric, with region zoom and hover popups.
-// (No external geo files — shapes are hand-simplified for the data countries.)
+// ── DEMOGRAPHIC MAP (Mapbox GL) ─────────────────────────────────────────────
+const MAPBOX_TOKEN = "pk.eyJ1IjoibGlnaHRob3VzZW9ydGhvIiwiYSI6ImNtcW56ZWdsMTBiYXYyc3F6aHo2Z2VzeGUifQ.26x35VGjGTOV5aUHoS27Ww";
 
-// Simplified polygons as [lon,lat] rings. Coarse but recognisable.
-const GEO = {
-  "United States":[[[-124,48],[-123,46],[-124,40],[-120,34],[-117,32],[-111,31],[-106,32],[-103,29],[-97,26],[-94,29],[-89,29],[-83,30],[-81,25],[-80,27],[-81,32],[-76,35],[-75,38],[-71,41],[-70,43],[-67,45],[-69,47],[-75,45],[-83,42],[-88,48],[-95,49],[-104,49],[-117,49],[-123,49]]],
-  "Canada":[[[-123,49],[-117,49],[-104,49],[-95,49],[-88,48],[-83,42],[-83,46],[-79,44],[-76,45],[-69,47],[-64,47],[-60,47],[-55,52],[-57,54],[-64,60],[-78,62],[-95,60],[-110,60],[-123,60],[-133,58],[-130,54],[-128,51]]],
-  "United Kingdom":[[[-5,50],[-3,51],[1,51],[1,53],[-1,54],[-2,56],[-5,58],[-6,57],[-5,55],[-5,53],[-3,53],[-5,51]]],
-  "France":[[[-1,49],[2,51],[8,49],[7,47],[7,44],[3,43],[-1,43],[-2,46],[-4,48]]],
-  "Germany":[[[6,54],[9,54],[14,54],[15,51],[13,49],[10,48],[8,48],[7,49],[6,51]]],
-  "Italy":[[[7,46],[13,46],[13,44],[18,40],[16,38],[15,38],[12,42],[10,44],[8,44]]],
-  "Spain":[[[-9,43],[-2,43],[3,42],[0,39],[-2,37],[-6,36],[-7,37],[-9,38],[-9,41]]],
-  "Netherlands":[[[3,51],[7,51],[7,53],[5,53],[3,52]]],
-  "Japan":[[[130,31],[132,34],[135,34],[140,36],[142,40],[141,43],[144,44],[140,42],[137,37],[133,35],[130,33]]],
-  "Australia":[[[114,-22],[122,-18],[130,-12],[137,-12],[142,-11],[146,-18],[153,-25],[150,-37],[143,-39],[135,-35],[129,-32],[118,-35],[114,-28]]],
+// Country name → ISO 3166-1 alpha-3 for Mapbox boundary matching
+const ISO_MAP = {
+  "United States":"USA","Canada":"CAN","United Kingdom":"GBR","Germany":"DEU",
+  "France":"FRA","Italy":"ITA","Spain":"ESP","Netherlands":"NLD",
+  "Japan":"JPN","Australia":"AUS","Brazil":"BRA","Mexico":"MEX",
+  "Argentina":"ARG","Colombia":"COL","Chile":"CHL","Peru":"PER",
+  "China":"CHN","India":"IND","South Korea":"KOR","Indonesia":"IDN",
+  "Thailand":"THA","Malaysia":"MYS","Vietnam":"VNM","Philippines":"PHL",
+  "Pakistan":"PAK","Bangladesh":"BGD","Singapore":"SGP","New Zealand":"NZL",
+  "Nigeria":"NGA","South Africa":"ZAF","Ethiopia":"ETH","Egypt":"EGY",
+  "Kenya":"KEN","Ghana":"GHA","Tanzania":"TZA","Morocco":"MAR",
+  "Uganda":"UGA","Mozambique":"MOZ",
+  "Saudi Arabia":"SAU","UAE":"ARE","Iran":"IRN","Iraq":"IRQ",
+  "Israel":"ISR","Jordan":"JOR","Kuwait":"KWT","Qatar":"QAT",
+  "Bahrain":"BHR","Oman":"OMN",
+  "Sweden":"SWE","Norway":"NOR","Denmark":"DNK","Poland":"POL",
+  "Belgium":"BEL","Austria":"AUT","Switzerland":"CHE","Portugal":"PRT",
+  "Finland":"FIN","Ireland":"IRL",
+};
+const ISO_TO_NAME = Object.fromEntries(Object.entries(ISO_MAP).map(([n,i])=>[i,n]));
+
+// Country centroids for zoom + popup positioning
+const CENTROIDS = {
+  "United States":[-98,39,4],"Canada":[-106,56,3],"United Kingdom":[-2,54,5.5],
+  "Germany":[10,51,5.5],"France":[2,47,5.5],"Italy":[12,43,5.5],
+  "Spain":[-3,40,5.5],"Netherlands":[5,52,7],"Japan":[138,37,5],
+  "Australia":[134,-25,3.5],"Brazil":[-52,-14,3.5],"Mexico":[-102,24,4.5],
+  "Argentina":[-64,-35,3.5],"Colombia":[-72,4,5],"Chile":[-70,-33,4],
+  "Peru":[-76,-10,4.5],"China":[104,35,3.5],"India":[79,22,4],
+  "South Korea":[128,36,6],"Indonesia":[118,-2,4],"Thailand":[101,15,5.5],
+  "Malaysia":[109,4,5.5],"Vietnam":[106,16,5],"Philippines":[122,12,5.5],
+  "Pakistan":[69,30,5],"Bangladesh":[90,24,6.5],"Singapore":[104,1.3,10],
+  "New Zealand":[173,-41,5],"Nigeria":[8,10,5],"South Africa":[25,-29,5],
+  "Ethiopia":[39,9,5],"Egypt":[30,27,5.5],"Kenya":[38,0,5.5],
+  "Ghana":[-1,8,6],"Tanzania":[35,-6,5.5],"Morocco":[-6,32,5.5],
+  "Uganda":[32,1,6.5],"Mozambique":[35,-18,4.5],
+  "Saudi Arabia":[45,24,4.5],"UAE":[54,24,7],"Iran":[53,32,5],
+  "Iraq":[44,33,5.5],"Israel":[35,31,7],"Jordan":[36,31,7],
+  "Kuwait":[48,29,8],"Qatar":[51,25,8],"Bahrain":[50.5,26,10],"Oman":[57,21,6],
+  "Sweden":[16,63,4],"Norway":[10,65,4],"Denmark":[10,56,6.5],
+  "Poland":[20,52,5.5],"Belgium":[4,51,7.5],"Austria":[14,47,6.5],
+  "Switzerland":[8,47,7],"Portugal":[-8,39,6],"Finland":[26,64,4.5],"Ireland":[-8,53,6],
 };
 
-// Region viewBoxes in lon/lat (minLon,minLat,maxLon,maxLat)
-const REGION_BOUNDS = {
-  "Global":      [-130, -45, 155, 62],
-  "Europe":      [-11, 35, 20, 60],
-  "Americas":    [-130, 25, -60, 62],
-  "Asia-Pacific":[110, -40, 150, 46],
-  "Africa":      [-20, -35, 52, 38],
-  "Middle East": [34, 12, 60, 40],
+// Region view configs
+const REGION_VIEW = {
+  "Global":      { lon:10,   lat:20,  zoom:1.5 },
+  "Europe":      { lon:15,   lat:50,  zoom:3.8 },
+  "Americas":    { lon:-85,  lat:20,  zoom:2.2 },
+  "Asia-Pacific":{ lon:115,  lat:10,  zoom:2.3 },
+  "Africa":      { lon:20,   lat:5,   zoom:2.5 },
+  "Middle East": { lon:45,   lat:28,  zoom:4.0 },
 };
 
 function DemographicMap({ year, metric, onMetricChange, region, onPick, selectedCountries }) {
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
   const [hover, setHover] = useState(null);
-  const [pinned, setPinned] = useState(null); // clicked country — keeps popup open
-  const W = 720, H = 420;
-  const bounds = REGION_BOUNDS[region] || REGION_BOUNDS["Global"];
-  const [minLon, minLat, maxLon, maxLat] = bounds;
-  // equirectangular projection into the region's bounding box
-  const projAll = (lon, lat) => {
-    const x = ((lon - (-180)) / 360) * W;
-    const y = ((85 - lat) / 170) * H;
-    return [x, y];
-  };
-  // viewBox derived from region bounds, with padding
-  const [vx0, vy0] = projAll(minLon, maxLat);
-  const [vx1, vy1] = projAll(maxLon, minLat);
-  const pad = 10;
-  const vbX = vx0 - pad, vbY = vy0 - pad, vbW = (vx1 - vx0) + pad*2, vbH = (vy1 - vy0) + pad*2;
+  const [pinned, setPinned] = useState(null);
+  const prevRegion = useRef(region);
 
-  // metric value + colour per country
   const metricVal = (name) => {
     const cd = COUNTRIES[name]; if (!cd) return null;
     const row = getDataForYear(cd.data, year);
@@ -1662,18 +1681,19 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
     if (metric==="cagr")  return cagr(r2025.a65to79+r2025.over80, r2035.a65to79+r2035.over80, 10);
     return null;
   };
+
   const metricCfg = {
-    aging: { label:"65+ SHARE", unit:"%", fmtV:v=>v.toFixed(1)+"%" },
-    total: { label:"TOTAL POP", unit:"",  fmtV:v=>fmt(Math.round(v)) },
-    cagr:  { label:"65+ CAGR 25–35", unit:"%", fmtV:v=>(v>0?"+":"")+v.toFixed(2)+"%" },
+    aging: { label:"65+ SHARE", fmtV:v=>v.toFixed(1)+"%" },
+    total: { label:"TOTAL POP", fmtV:v=>fmt(Math.round(v)) },
+    cagr:  { label:"65+ CAGR 25–35", fmtV:v=>(v>0?"+":"")+v.toFixed(2)+"%" },
   }[metric];
 
-  const vals = Object.keys(GEO).map(metricVal).filter(v=>v!=null);
-  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const allVals = Object.keys(COUNTRIES).map(metricVal).filter(v=>v!=null);
+  const lo = Math.min(...allVals), hi = Math.max(...allVals);
+
   const shade = (v) => {
-    if (v==null) return "#E2E8F0";
+    if (v==null) return "rgba(226,232,240,0.3)";
     const t = hi>lo ? (v-lo)/(hi-lo) : 0.5;
-    // teal → amber → red ramp
     const lerp=(a,b,x)=>Math.round(a+(b-a)*x);
     let r,g,b;
     if (t<0.5){ const x=t/0.5; r=lerp(0,245,x); g=lerp(196,166,x); b=lerp(180,35,x); }
@@ -1681,12 +1701,91 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
     return `rgb(${r},${g},${b})`;
   };
 
-  const pathFor = (rings) => rings.map(ring =>
-    "M" + ring.map(([lon,lat]) => projAll(lon,lat).join(",")).join("L") + "Z"
-  ).join(" ");
+  // Build fill-color expression for Mapbox
+  const fillExpr = useMemo(() => {
+    const matches = [];
+    Object.entries(ISO_MAP).forEach(([name, iso]) => {
+      const v = metricVal(name);
+      if (v != null) matches.push(iso, shade(v));
+    });
+    if (matches.length === 0) return "rgba(226,232,240,0.3)";
+    return ["match", ["get", "iso_3166_1_alpha_3"], ...matches, "rgba(226,232,240,0.3)"];
+  }, [metric, year]);
+
+  const rv = REGION_VIEW[region] || REGION_VIEW.Global;
+
+  // Create map once
+  useEffect(() => {
+    if (mapRef.current || !containerRef.current) return;
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const m = new mapboxgl.Map({
+      container: containerRef.current,
+      style: "mapbox://styles/mapbox/light-v11",
+      center: [rv.lon, rv.lat],
+      zoom: rv.zoom,
+      attributionControl: false,
+    });
+    m.addControl(new mapboxgl.NavigationControl({ showCompass:false }), "top-right");
+    m.on("load", () => {
+      m.addSource("country-boundaries", {
+        type:"vector", url:"mapbox://mapbox.country-boundaries-v1",
+      });
+      m.addLayer({
+        id:"country-fill", type:"fill",
+        source:"country-boundaries", "source-layer":"country_boundaries",
+        paint:{ "fill-color":"rgba(226,232,240,0.3)", "fill-opacity":0.75 },
+        filter:["has","iso_3166_1_alpha_3"],
+      });
+      m.addLayer({
+        id:"country-outline", type:"line",
+        source:"country-boundaries", "source-layer":"country_boundaries",
+        paint:{ "line-color":"rgba(255,255,255,0.6)", "line-width":0.4 },
+        filter:["has","iso_3166_1_alpha_3"],
+      });
+      setMapReady(true);
+    });
+    m.on("mousemove","country-fill",(e)=>{
+      if (!e.features||!e.features.length) return;
+      m.getCanvas().style.cursor="pointer";
+      const iso=e.features[0].properties.iso_3166_1_alpha_3;
+      const name=ISO_TO_NAME[iso];
+      if (name) setHover(name);
+    });
+    m.on("mouseleave","country-fill",()=>{
+      m.getCanvas().style.cursor="";
+      setHover(null);
+    });
+    m.on("click","country-fill",(e)=>{
+      if (!e.features||!e.features.length) return;
+      const iso=e.features[0].properties.iso_3166_1_alpha_3;
+      const name=ISO_TO_NAME[iso];
+      if (!name||!COUNTRIES[name]) return;
+      const cen=CENTROIDS[name];
+      if (cen) m.flyTo({center:[cen[0],cen[1]],zoom:cen[2],duration:800});
+      setPinned(p=>p===name?null:name);
+    });
+    mapRef.current = m;
+    return () => { m.remove(); mapRef.current=null; };
+  }, []);
+
+  // Update fill colors when metric/year changes
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    try { mapRef.current.setPaintProperty("country-fill","fill-color",fillExpr); } catch(e){}
+  }, [fillExpr, mapReady]);
+
+  // Fly to region when filter changes
+  useEffect(() => {
+    if (region!==prevRegion.current && mapRef.current) {
+      const rv=REGION_VIEW[region]||REGION_VIEW.Global;
+      mapRef.current.flyTo({center:[rv.lon,rv.lat],zoom:rv.zoom,duration:1200});
+      prevRegion.current=region;
+      setPinned(null);
+    }
+  }, [region]);
 
   const activeName = hover || pinned;
-  const hv = activeName ? { name:activeName, val:metricVal(activeName) } : null;
+  const hv = activeName && COUNTRIES[activeName] ? { name:activeName } : null;
   const hvRow = hv ? getDataForYear(COUNTRIES[hv.name].data, year) : null;
   const hvCagr = hv ? (()=>{ const cd=COUNTRIES[hv.name]; const a=getDataForYear(cd.data,2025), b=cd.data[cd.data.length-1]; return cagr(a.a65to79+a.over80,b.a65to79+b.over80,10);})() : null;
 
@@ -1705,40 +1804,11 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
         ))}
       </div>
 
-      <div style={{background:"linear-gradient(180deg,#EAF2FB 0%,#DCEAF7 100%)",borderRadius:14,border:`1px solid ${C.border}`,overflow:"hidden"}}>
-        <svg width="100%" viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`} style={{display:"block"}}>
-          {Object.entries(GEO).map(([name,rings])=>{
-            const v = metricVal(name);
-            const activeName = hover || pinned;
-            const isHover = activeName===name;
-            const isSel = selectedCountries?.includes(name);
-            return (
-              <path key={name} d={pathFor(rings)}
-                fill={shade(v)} stroke={isHover?C.navy:isSel?C.teal:"#fff"} strokeWidth={isHover?1.6:isSel?1.2:0.6}
-                style={{cursor:"pointer",transition:"fill 0.2s"}} opacity={activeName&&!isHover?0.7:1}
-                onMouseEnter={()=>setHover(name)} onMouseLeave={()=>setHover(null)}
-                onClick={(e)=>{e.stopPropagation();setPinned(p=>p===name?null:name);}}
-              />
-            );
-          })}
-          {/* labels for larger regions */}
-          {Object.entries(GEO).map(([name,rings])=>{
-            const cs = rings[0].reduce((a,[lo,la])=>[a[0]+lo,a[1]+la],[0,0]).map(s=>s/rings[0].length);
-            const [lx,ly]=projAll(cs[0],cs[1]);
-            const v=metricVal(name);
-            // only show label if region is zoomed or country is large enough
-            if (region==="Global" && !["United States","Canada","Australia","Japan"].includes(name)) return null;
-            return (
-              <text key={name+"l"} x={lx} y={ly} textAnchor="middle" fontSize={vbW*0.012} fontWeight="700"
-                fill="#fff" fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.3" style={{pointerEvents:"none",textShadow:"0 1px 2px rgba(0,0,0,0.4)"}}>
-                {COUNTRIES[name]?.flag} {v!=null?metricCfg.fmtV(v):""}
-              </text>
-            );
-          })}
-        </svg>
+      <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${C.border}`}}>
+        <div ref={containerRef} style={{width:"100%",height:420}}/>
       </div>
 
-      {/* legend / colour ramp */}
+      {/* legend */}
       <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
         <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:8,letterSpacing:1,color:C.sub}}>{metricCfg.fmtV(lo)}</span>
         <div style={{flex:1,height:8,borderRadius:4,background:"linear-gradient(90deg,rgb(0,196,180),rgb(245,166,35),rgb(224,82,82))"}}/>
@@ -1746,19 +1816,19 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
         <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:8,letterSpacing:1.5,color:C.navy,marginLeft:4}}>{metricCfg.label}</span>
       </div>
 
-      {/* country detail popup (hover preview or pinned by click) */}
+      {/* data popup */}
       {hv && hvRow && (
         <div style={{
           position:"absolute", top:46, right:10, zIndex:20,
-          background:C.navy, borderRadius:12, padding:"12px 14px", minWidth:180,
+          background:C.navy, borderRadius:12, padding:"12px 14px", minWidth:190,
           boxShadow:"0 10px 28px rgba(11,31,58,0.4)", border:`1px solid ${C.teal}`,
           pointerEvents:pinned?"auto":"none",
         }}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,paddingBottom:7,borderBottom:`1px solid rgba(255,255,255,0.14)`}}>
-            <span style={{fontSize:18}}>{COUNTRIES[hv.name].flag}</span>
+            <span style={{fontSize:18}}>{COUNTRIES[hv.name]?.flag}</span>
             <div style={{flex:1}}>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:0.8,color:"#fff",lineHeight:1}}>{hv.name}</div>
-              <div style={{fontFamily:"system-ui",fontSize:9,color:"rgba(255,255,255,0.55)",marginTop:2}}>{COUNTRIES[hv.name].region} · {year}</div>
+              <div style={{fontFamily:"system-ui",fontSize:9,color:"rgba(255,255,255,0.55)",marginTop:2}}>{COUNTRIES[hv.name]?.region} · {year}</div>
             </div>
             {pinned && (
               <button onClick={(e)=>{e.stopPropagation();setPinned(null);}} style={{border:"none",background:"rgba(255,255,255,0.12)",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:14,lineHeight:1,flexShrink:0}}>×</button>
@@ -2334,7 +2404,7 @@ export default function PopulationDemographics() {
               onPick={goToProfile}
             />
             <div style={{fontFamily:"system-ui",fontSize:10,color:C.sub,marginTop:10,lineHeight:1.5}}>
-              Hover or tap a country to see its detail card. From the card you can open the full profile. Use the <b>Region</b> filter above to zoom the map. Shading covers the {Object.keys(GEO).length} countries with verified 2025 data.
+              Hover or tap a country to see its detail card. From the card you can open the full profile. Use the <b>Region</b> filter above to zoom the map. Countries with data are shaded by the selected metric.
             </div>
           </div>
         )}

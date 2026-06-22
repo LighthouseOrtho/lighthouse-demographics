@@ -1607,7 +1607,7 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
 }
 
 // ── DEMOGRAPHIC MAP (Mapbox GL) ─────────────────────────────────────────────
-const MAPBOX_TOKEN = "pk.eyJ1IjoibGlnaHRob3VzZW9ydGhvIiwiYSI6ImNtcW56ZWdsMTBiYXYyc3F6aHo2Z2VzeGUifQ.26x35VGjGTOV5aUHoS27Ww";
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 // Country name → ISO 3166-1 alpha-3 for Mapbox boundary matching
 const ISO_MAP = {

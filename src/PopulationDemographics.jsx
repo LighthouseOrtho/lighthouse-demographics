@@ -1241,7 +1241,7 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
   const primary = valid.find(s => s.primary) || valid[0];
   const compares = valid.filter(s => !s.primary);
 
-  const w = 320, h = height, padL = 38, padR = 8, padT = 14, padB = 30;
+  const w = 320, h = height, padL = 38, padR = 8, padT = 10, padB = 22;
   const plotW = w - padL - padR, plotH = h - padT - padB;
   const n = BANDS.length;
   const slot = plotW / n;                       // width per band slot
@@ -1564,9 +1564,9 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
                 <Zoomable
                   title={`${name} · Age Distribution ${yrLabel}`}
                   onZoom={onZoom}
-                  renderLarge={()=><AgeDistributionCurve height={280} series={distSeries}/>}
+                  renderLarge={()=><AgeDistributionCurve height={240} series={distSeries}/>}
                 >
-                  <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}><AgeDistributionCurve height={90} series={distSeries}/></div>
+                  <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}><AgeDistributionCurve height={140} series={distSeries}/></div>
                 </Zoomable>
               );
             })()}
@@ -1578,9 +1578,9 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
             <Zoomable
               title={`${name} · Population Trend 2005–2035`}
               onZoom={onZoom}
-              renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={260} width={560} showLegend={true}/>}
+              renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={240} width={560} showLegend={true}/>}
             >
-              <TrendLine series={trendSeries} years={YEARS} height={95} showLegend={true}/>
+              <TrendLine series={trendSeries} years={YEARS} height={115} showLegend={true}/>
             </Zoomable>
           </div>
 
@@ -1612,6 +1612,142 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
             color:"#fff",cursor:"pointer",
           }}>
             {isSelected?"✓ SELECTED FOR TABLE":"+ ADD TO COMPARISON"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ── US STATE PROFILE CARD ──────────────────────────────────────────────────────
+function StateProfileCard({ name, isSelected, onSelect, defaultOpen, cardId, onZoom }) {
+  const [expanded, setExpanded] = useState(!!defaultOpen);
+  const stateData = US_STATE_DATA[name];
+  if (!stateData) return null;
+  const row = stateData[2025];
+  const row2030 = stateData[2030] || null;
+  if (!row) return null;
+
+  const agingPct = ((row.a65to79 + row.over80) / row.total * 100).toFixed(1);
+  const cagr65   = row2030 ? cagr(row.a65to79+row.over80, row2030.a65to79+row2030.over80, 5) : null;
+  const cagrTot  = row2030 ? cagr(row.total, row2030.total, 5) : null;
+  const spark65  = row2030 ? [row.a65to79+row.over80, row2030.a65to79+row2030.over80] : [row.a65to79+row.over80];
+
+  const donutSegs = [
+    { label:"<18",   value:row.under18,  color:C.green,  mixPct:(row.under18/row.total*100),  cagr2530:null, pop2030:row2030?row2030.under18:null },
+    { label:"18-49", value:row.a18to49,  color:C.teal,   mixPct:(row.a18to49/row.total*100),  cagr2530:null, pop2030:row2030?row2030.a18to49:null },
+    { label:"50-64", value:row.a50to64,  color:C.purple, mixPct:(row.a50to64/row.total*100),  cagr2530:null, pop2030:row2030?row2030.a50to64:null },
+    { label:"65-79", value:row.a65to79,  color:C.amber,  mixPct:(row.a65to79/row.total*100),  cagr2530:null, pop2030:row2030?row2030.a65to79:null },
+    { label:"80+",   value:row.over80,   color:C.red,    mixPct:(row.over80/row.total*100),   cagr2530:null, pop2030:row2030?row2030.over80:null },
+  ].filter(s => s.value > 0);
+
+  return (
+    <div id={cardId} style={{
+      background:"#fff", borderRadius:14, border:`1px solid ${C.border}`,
+      overflow:"hidden", boxShadow:"0 2px 12px rgba(11,31,58,0.08)",
+      borderLeft:`4px solid ${C.navy}`,
+    }}>
+      {/* HEADER */}
+      <div style={{padding:"12px 14px",cursor:"pointer"}} onClick={()=>setExpanded(v=>!v)}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{
+            width:40,height:40,borderRadius:10,flexShrink:0,
+            background:"linear-gradient(135deg,#3C3B6E22,#3C3B6E11)",
+            border:"1px solid #3C3B6E44",
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,
+          }}>🇺🇸</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:1.5,color:C.navy,lineHeight:1}}>{name}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:C.teal,marginTop:1}}>UNITED STATES</div>
+          </div>
+          <div style={{textAlign:"center",marginRight:4}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,lineHeight:1,color:parseFloat(agingPct)>18?C.red:parseFloat(agingPct)>12?C.amber:C.green}}>{agingPct}%</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:C.sub}}>65+</div>
+          </div>
+          <div style={{flexShrink:0}}><Spark values={spark65} color={C.amber} w={44} h={20}/></div>
+          <button onClick={e=>{e.stopPropagation();onSelect&&onSelect(name);}} style={{
+            border:`1.5px solid ${isSelected?C.red:C.teal}`,
+            background:isSelected?`${C.red}14`:`${C.teal}14`,
+            color:isSelected?C.red:C.teal,cursor:"pointer",
+            borderRadius:8,padding:"3px 8px",flexShrink:0,
+            fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:0.5,lineHeight:1,
+          }}>{isSelected?"✓":"+"}</button>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.sub,letterSpacing:1}}>{expanded?"▲":"▼"}</div>
+        </div>
+
+        {/* STATS GRID */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:5,marginTop:8}}>
+          {[
+            {label:"TOTAL",  value:row.total.toLocaleString(),              color:C.navy},
+            {label:"< 18",   value:row.under18.toLocaleString(),            color:C.green},
+            {label:"65+",    value:(row.a65to79+row.over80).toLocaleString(),color:parseFloat(agingPct)>18?C.red:C.amber},
+          ].map(({label,value,color:col})=>(
+            <div key={label} style={{background:"#F4F8FC",borderRadius:8,padding:"7px 4px",textAlign:"center",borderTop:`2px solid ${col}`}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:C.sub,marginBottom:2}}>{label}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:col,letterSpacing:0.5,lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* CAGR STRIP */}
+        {cagr65 !== null && (
+          <div style={{display:"flex",gap:6,marginTop:8,alignItems:"center"}}>
+            <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.sub,flexShrink:0}}>CAGR 25–30</span>
+            <div style={{display:"flex",gap:8}}>
+              {[{l:"Total",v:cagrTot},{l:"65+",v:cagr65}].map(({l,v})=>(
+                <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
+                  <span style={{fontFamily:"system-ui",fontSize:10,color:C.sub}}>{l}</span>
+                  <CagrBadge value={v} size="sm"/>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* EXPANDED DETAIL */}
+      {expanded && (
+        <div style={{borderTop:`1px solid ${C.border}`,padding:"14px 14px 18px"}}>
+          {/* Donut */}
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.navy,marginBottom:10}}>AGE DISTRIBUTION 2025</div>
+          <Donut interactive year={2025} segments={donutSegs} size={160} centerLabel={agingPct+"%"} centerSub="aged 65+"/>
+          <div style={{display:"flex",flexWrap:"wrap",gap:"5px 10px",justifyContent:"center",marginTop:10}}>
+            {[{l:"<18",col:C.green},{l:"18-49",col:C.teal},{l:"50-64",col:C.purple},{l:"65-79",col:C.amber},{l:"80+",col:C.red}].map(({l,col})=>(
+              <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
+                <div style={{width:8,height:8,borderRadius:2,background:col}}/>
+                <span style={{fontFamily:"system-ui",fontSize:11,color:C.navy}}>{l}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 2030 outlook */}
+          {row2030 && (
+            <div style={{marginTop:14}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.navy,marginBottom:10}}>2025 → 2030 OUTLOOK</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                <div style={{background:"#FFF8EC",borderRadius:10,padding:"10px 12px",border:`1px solid ${C.amber}33`}}>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.amber,marginBottom:4}}>65+ POP 2030</div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:C.amber,lineHeight:1}}>{fmt(row2030.a65to79+row2030.over80)}</div>
+                  <div style={{marginTop:4}}><CagrBadge value={cagr65} size="sm"/></div>
+                </div>
+                <div style={{background:"#F0FAF5",borderRadius:10,padding:"10px 12px",border:`1px solid ${C.green}33`}}>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.green,marginBottom:4}}>TOTAL 2030</div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:C.green,lineHeight:1}}>{fmt(row2030.total)}</div>
+                  <div style={{marginTop:4}}><CagrBadge value={cagrTot} size="sm"/></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button onClick={e=>{e.stopPropagation();onSelect&&onSelect(name);}} style={{
+            width:"100%",padding:"9px",borderRadius:10,marginTop:14,
+            border:`1.5px solid ${isSelected?C.red:C.teal}`,
+            background:isSelected?C.red:C.teal,
+            fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,
+            color:"#fff",cursor:"pointer",
+          }}>
+            {isSelected?"✓ SELECTED":"+ ADD TO COMPARISON"}
           </button>
         </div>
       )}
@@ -2074,6 +2210,8 @@ export default function PopulationDemographics() {
   const [selectedYear, setYear]   = useState(2025);
   const [selectedCountries, setSelectedCountries] = useState(["United Kingdom","Germany","Japan","United States"]);
   const [favCountries, setFavCountries] = useState([]);
+  const [selectedStates, setSelectedStates] = useState([]);
+  const toggleState = name => setSelectedStates(prev => prev.includes(name) ? prev.filter(x=>x!==name) : [...prev,name]);
   const [sortCol, setSortCol]     = useState("total");
   const [sortDir, setSortDir]     = useState("desc");
   const [search, setSearch]       = useState("");
@@ -2550,7 +2688,7 @@ export default function PopulationDemographics() {
                         </div>
                       </div>
                     )})} style={{cursor:"zoom-in"}}>
-                    <Donut segments={regionDonut} size={100} centerLabel={agingPct+"%"} centerSub="aged 65+"/>
+                    <Donut segments={regionDonut} size={140} centerLabel={agingPct+"%"} centerSub="aged 65+"/>
                   </div>
                 </div>
                 <div>
@@ -2743,7 +2881,7 @@ export default function PopulationDemographics() {
                 <Zoomable
                   title="Population Trend 2005–2035"
                   onZoom={openZoom}
-                  renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={260} width={560} showLegend={true}/>}
+                  renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={240} width={560} showLegend={true}/>}
                 >
                   <TrendLine series={trendSeries} years={YEARS} height={130} showLegend={true}/>
                 </Zoomable>
@@ -2781,7 +2919,7 @@ export default function PopulationDemographics() {
                             onClick={()=>col.key!=="name"&&handleSort(col.key)}
                             style={{
                               padding:"8px 10px",textAlign:col.align,
-                              fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,
+                              fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:1.5,
                               color:sortCol===col.key?C.teal:(col.color||C.sub),
                               cursor:col.key!=="name"?"pointer":"default",
                               whiteSpace:"nowrap",minWidth:col.w,
@@ -2814,7 +2952,7 @@ export default function PopulationDemographics() {
                               <div style={{fontFamily:"system-ui",fontSize:11,color:C.sub}}>{pctOfTotal}%</div>
                             </td>
                             {ageColumns.map(c=>(
-                              <td key={c.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,color:c.color}}>{fmt(row[c.key])}</td>
+                              <td key={c.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:13,color:C.navy}}>{fmt(row[c.key])}</td>
                             ))}
                             <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,color:C.navy,background:"#F4F8FC"}}>{fmt(row.selected)}</td>
                             <td style={{padding:"8px 10px",textAlign:"right"}}>
@@ -2852,7 +2990,7 @@ export default function PopulationDemographics() {
                         <td style={{padding:"8px 10px",fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:1,color:C.sub,position:"sticky",left:0,background:"#F4F8FC",zIndex:2}}>TOTAL ({sortedRows.length} COUNTRIES)</td>
                         <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,color:C.navy}}>{fmt(tableRows.reduce((s,r)=>s+r.total,0))}</td>
                         {ageColumns.map(c=>(
-                          <td key={c.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,color:c.color}}>{fmt(tableRows.reduce((s,r)=>s+r[c.key],0))}</td>
+                          <td key={c.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:13,color:C.navy}}>{fmt(tableRows.reduce((s,r)=>s+r[c.key],0))}</td>
                         ))}
                         <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:14,color:C.teal,background:"#E8F7F5"}}>{fmt(grandTotal)}</td>
                         <td colSpan={5}/>

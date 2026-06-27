@@ -1805,7 +1805,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
       </div>
 
       <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${C.border}`}}>
-        <div ref={containerRef} style={{width:"100%",height:420}}/>
+        <div ref={containerRef} style={{width:"100%",height:340}}/>
       </div>
 
       {/* legend */}
@@ -2142,7 +2142,7 @@ export default function PopulationDemographics() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{minHeight:"100vh", background:C.bg, fontFamily:"system-ui,sans-serif", paddingBottom:48}}>
+    <div style={{minHeight:"100vh", background:C.bg, fontFamily:"system-ui,sans-serif", paddingBottom:32}}>
 
       {/* ── HEADER ── */}
       <div style={{background:C.navy, borderBottom:`3px solid ${C.teal}`, padding:"0 16px", position:"sticky", top:0, zIndex:200}}>
@@ -2181,7 +2181,7 @@ export default function PopulationDemographics() {
         </div>
       </div>
 
-      <div style={{maxWidth:700, margin:"0 auto", padding:"0 16px"}}>
+      <div style={{padding:"0 12px"}}>
 
         {/* ── FILTERS PANEL ── */}
         <div style={{marginTop:14, background:"#fff", borderRadius:14, border:`1px solid ${C.border}`, padding:"14px 16px", boxShadow:"0 2px 10px rgba(11,31,58,0.06)"}}>
@@ -2296,7 +2296,7 @@ export default function PopulationDemographics() {
               </div>
 
               {/* Stats */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:12}}>
                 {[
                   {label:"TOTAL",   value:fmt(regionNow.total), color:REGIONS[region]?.color||C.teal},
                   {label:"< 18",    value:fmt(regionNow.under18), color:C.green},

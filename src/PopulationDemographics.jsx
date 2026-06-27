@@ -806,6 +806,7 @@ function Spark({ values, color="#00C4B4", w=60, h=24 }) {
 // larger render of the same chart so it pops out in a full-width modal.
 function Zoomable({ title, onZoom, renderLarge, children }) {
   return (
+    <>
     <div style={{position:"relative"}}>
       <div
         onClick={()=>onZoom && onZoom({ title, node: renderLarge() })}
@@ -987,7 +988,7 @@ function Donut({ segments, size=130, centerLabel, centerSub, interactive=false, 
 }
 
 // ── POPULATION BAR CHART ──────────────────────────────────────────────────────
-function PopBarChart({ data, genderFilter, ageGroups, highlightYear, big=false }) {
+function PopBarChart({ data, genderFilter, ageGroups, highlightYear, big=false, lightText=false }) {
   const maxVal = Math.max(...data.map(d => d.value), 1);
   const H = big ? 280 : 110, barMax = big ? 240 : 86, lblFs = big ? 14 : 12, valFs = big ? 14 : 12, valTop = big ? -20 : -14;
   return (
@@ -1005,11 +1006,11 @@ function PopBarChart({ data, genderFilter, ageGroups, highlightYear, big=false }
               transition:"height 0.3s",
               position:"relative",
             }}>
-              {(isHighlight || big) && <div style={{position:"absolute",top:valTop,left:"50%",transform:"translateX(-50%)",fontFamily:"'Bebas Neue',sans-serif",fontSize:valFs,letterSpacing:1,color:isHighlight?C.teal:C.sub,whiteSpace:"nowrap"}}>{fmt(d.value)}</div>}
+              {(isHighlight || big) && <div style={{position:"absolute",top:valTop,left:"50%",transform:"translateX(-50%)",fontFamily:"'Bebas Neue',sans-serif",fontSize:valFs,letterSpacing:1,color:isHighlight?C.teal:(lightText?"rgba(255,255,255,0.82)":C.sub),whiteSpace:"nowrap"}}>{fmt(d.value)}</div>}
             </div>
             <div style={{
               fontFamily:"'Bebas Neue',sans-serif", fontSize:lblFs, letterSpacing:0.5,
-              color: isHighlight ? C.teal : isFuture ? C.sub : (big?C.navy:C.navy),
+              color: isHighlight ? C.teal : isFuture ? (lightText?"rgba(255,255,255,0.7)":C.sub) : (lightText?"rgba(255,255,255,0.92)":C.navy),
               marginTop:3, textAlign:"center",
             }}>{d.year}</div>
           </div>
@@ -1570,9 +1571,9 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
               <Zoomable
                 title={`${name} · Population Trend 2005–2035`}
                 onZoom={onZoom}
-                renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={280} width={540} showLegend={true}/>}
+                renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={260} width={520} showLegend={true}/>}
               >
-                <TrendLine series={trendSeries} years={YEARS} height={140} showLegend={false}/>
+                <TrendLine series={trendSeries} years={YEARS} height={140} width={170} showCagr={false} showLegend={false}/>
               </Zoomable>
             </div>
 
@@ -2091,6 +2092,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
   const hvCagr = hv ? (()=>{ const cd=COUNTRIES[hv.name]; const a=getDataForYear(cd.data,2025), b=cd.data[cd.data.length-1]; return cagr(a.a65to79+a.over80,b.a65to79+b.over80,10);})() : null;
 
   return (
+    <>
     <div style={{position:"relative"}}>
       {/* metric switch */}
       <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
@@ -2190,6 +2192,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
       })()}
 
     </div>
+    </>
   );
 }
 
@@ -2979,6 +2982,59 @@ export default function PopulationDemographics() {
                         );
                       })}
                     </tbody>
+                    {/* US State rows */}
+                    {selectedStates.length>0 && (
+                      <tbody>
+                        <tr><td colSpan={99} style={{padding:"6px 10px 2px",fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.sub,background:"#F4F8FC",borderTop:`2px solid ${C.border}`}}>🇺🇸 US STATES · 2025 ACS DATA</td></tr>
+                        {selectedStates.map(name=>{
+                          const d=US_STATE_DATA[name]?.[2025];
+                          const d30=US_STATE_DATA[name]?.[2030];
+                          if(!d) return null;
+                          const mod=getAgeGroups(genderFilter);
+                          const u18=Math.round(d.under18*mod.u18);
+                          const w=Math.round((d.a18to49||0)*mod.w);
+                          const p=Math.round((d.a50to64||0)*mod.p);
+                          const s=Math.round(d.a65to79*mod.s);
+                          const e=Math.round(d.over80*mod.e);
+                          const over65=s+e;
+                          const agPct=((d.a65to79+d.over80)/d.total*100).toFixed(1);
+                          const cagr65v=d30?cagr(d.a65to79+d.over80,d30.a65to79+d30.over80,5):null;
+                          const cagrTotV=d30?cagr(d.total,d30.total,5):null;
+                          let sel=0;
+                          if(ageGroups.includes("under18"))sel+=u18;
+                          if(ageGroups.includes("18to49"))sel+=w;
+                          if(ageGroups.includes("50to64"))sel+=p;
+                          if(ageGroups.includes("65to79"))sel+=s;
+                          if(ageGroups.includes("over80"))sel+=e;
+                          return (
+                            <tr key={name} style={{borderBottom:`1px solid ${C.border}`,background:"#FFFEF8"}}>
+                              <td style={{padding:"8px 10px",borderLeft:`3px solid ${C.navy}`,position:"sticky",left:0,background:"#FFFEF8",zIndex:2}}>
+                                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                                  <span style={{fontSize:13}}>🇺🇸</span>
+                                  <div>
+                                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy,letterSpacing:0.5,lineHeight:1}}>{name}</div>
+                                    <div style={{fontFamily:"system-ui",fontSize:9,color:C.sub}}>United States</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy}}>{fmt(d.total)}</td>
+                              {ageColumns.map(col=>(
+                                <td key={col.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy}}>
+                                  {fmt({under18:u18,a18to49:w,a50to64:p,a65to79:s,over80:e,over65}[col.key]||0)}
+                                </td>
+                              ))}
+                              <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy,background:"#F4F8FC"}}>{fmt(sel)}</td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>
+                                <div style={{display:"inline-block",padding:"2px 8px",borderRadius:10,background:parseFloat(agPct)>20?`${C.red}22`:parseFloat(agPct)>14?`${C.amber}22`:`${C.green}22`,fontFamily:"'Bebas Neue',sans-serif",fontSize:10,color:parseFloat(agPct)>20?C.red:parseFloat(agPct)>14?C.amber:C.green}}>{agPct}%</div>
+                              </td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>{cagrTotV!=null?<CagrBadge value={cagrTotV} size="sm"/>:"—"}</td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>{cagr65v!=null?<CagrBadge value={cagr65v} size="sm"/>:"—"}</td>
+                              <td colSpan={2} style={{padding:"8px 10px",textAlign:"center",fontFamily:"system-ui",fontSize:10,color:C.sub}}>2025–30 only</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    )}
                     <tfoot>
                       <tr style={{background:"#F4F8FC",borderTop:`2px solid ${C.border}`}}>
                         <td style={{padding:"8px 10px",fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:1,color:C.sub,position:"sticky",left:0,background:"#F4F8FC",zIndex:2}}>TOTAL ({sortedRows.length} COUNTRIES)</td>
@@ -3111,6 +3167,59 @@ export default function PopulationDemographics() {
                         </tr>
                       ))}
                     </tbody>
+                    {/* US State rows */}
+                    {selectedStates.length>0 && (
+                      <tbody>
+                        <tr><td colSpan={99} style={{padding:"6px 10px 2px",fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.sub,background:"#F4F8FC",borderTop:`2px solid ${C.border}`}}>🇺🇸 US STATES · 2025 ACS DATA</td></tr>
+                        {selectedStates.map(name=>{
+                          const d=US_STATE_DATA[name]?.[2025];
+                          const d30=US_STATE_DATA[name]?.[2030];
+                          if(!d) return null;
+                          const mod=getAgeGroups(genderFilter);
+                          const u18=Math.round(d.under18*mod.u18);
+                          const w=Math.round((d.a18to49||0)*mod.w);
+                          const p=Math.round((d.a50to64||0)*mod.p);
+                          const s=Math.round(d.a65to79*mod.s);
+                          const e=Math.round(d.over80*mod.e);
+                          const over65=s+e;
+                          const agPct=((d.a65to79+d.over80)/d.total*100).toFixed(1);
+                          const cagr65v=d30?cagr(d.a65to79+d.over80,d30.a65to79+d30.over80,5):null;
+                          const cagrTotV=d30?cagr(d.total,d30.total,5):null;
+                          let sel=0;
+                          if(ageGroups.includes("under18"))sel+=u18;
+                          if(ageGroups.includes("18to49"))sel+=w;
+                          if(ageGroups.includes("50to64"))sel+=p;
+                          if(ageGroups.includes("65to79"))sel+=s;
+                          if(ageGroups.includes("over80"))sel+=e;
+                          return (
+                            <tr key={name} style={{borderBottom:`1px solid ${C.border}`,background:"#FFFEF8"}}>
+                              <td style={{padding:"8px 10px",borderLeft:`3px solid ${C.navy}`,position:"sticky",left:0,background:"#FFFEF8",zIndex:2}}>
+                                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                                  <span style={{fontSize:13}}>🇺🇸</span>
+                                  <div>
+                                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy,letterSpacing:0.5,lineHeight:1}}>{name}</div>
+                                    <div style={{fontFamily:"system-ui",fontSize:9,color:C.sub}}>United States</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy}}>{fmt(d.total)}</td>
+                              {ageColumns.map(col=>(
+                                <td key={col.key} style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy}}>
+                                  {fmt({under18:u18,a18to49:w,a50to64:p,a65to79:s,over80:e,over65}[col.key]||0)}
+                                </td>
+                              ))}
+                              <td style={{padding:"8px 10px",textAlign:"right",fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:C.navy,background:"#F4F8FC"}}>{fmt(sel)}</td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>
+                                <div style={{display:"inline-block",padding:"2px 8px",borderRadius:10,background:parseFloat(agPct)>20?`${C.red}22`:parseFloat(agPct)>14?`${C.amber}22`:`${C.green}22`,fontFamily:"'Bebas Neue',sans-serif",fontSize:10,color:parseFloat(agPct)>20?C.red:parseFloat(agPct)>14?C.amber:C.green}}>{agPct}%</div>
+                              </td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>{cagrTotV!=null?<CagrBadge value={cagrTotV} size="sm"/>:"—"}</td>
+                              <td style={{padding:"8px 10px",textAlign:"right"}}>{cagr65v!=null?<CagrBadge value={cagr65v} size="sm"/>:"—"}</td>
+                              <td colSpan={2} style={{padding:"8px 10px",textAlign:"center",fontFamily:"system-ui",fontSize:10,color:C.sub}}>2025–30 only</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    )}
                     <tfoot>
                       {(()=>{
                         const tot = {};

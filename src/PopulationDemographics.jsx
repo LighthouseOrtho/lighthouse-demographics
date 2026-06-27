@@ -1607,6 +1607,118 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
 }
 
 // ── DEMOGRAPHIC MAP (Mapbox GL) ─────────────────────────────────────────────
+// ── US STATE CENTROIDS (for map markers) ──────────────────────────────────
+const US_STATE_CENTROIDS = [
+  { name:"Alabama", lat:32.8, lng:-86.9 },
+  { name:"Alaska", lat:64.2, lng:-152.5 },
+  { name:"Arizona", lat:34.0, lng:-111.1 },
+  { name:"Arkansas", lat:34.7, lng:-92.2 },
+  { name:"California", lat:36.8, lng:-119.4 },
+  { name:"Colorado", lat:39.1, lng:-105.3 },
+  { name:"Connecticut", lat:41.6, lng:-72.8 },
+  { name:"Delaware", lat:39.0, lng:-75.5 },
+  { name:"District of Columbia", lat:38.9, lng:-77.0 },
+  { name:"Florida", lat:27.7, lng:-81.5 },
+  { name:"Georgia", lat:33.0, lng:-83.5 },
+  { name:"Hawaii", lat:19.9, lng:-155.5 },
+  { name:"Idaho", lat:44.1, lng:-114.7 },
+  { name:"Illinois", lat:40.6, lng:-89.4 },
+  { name:"Indiana", lat:40.3, lng:-86.1 },
+  { name:"Iowa", lat:42.0, lng:-93.1 },
+  { name:"Kansas", lat:38.5, lng:-98.5 },
+  { name:"Kentucky", lat:37.8, lng:-84.3 },
+  { name:"Louisiana", lat:30.5, lng:-92.1 },
+  { name:"Maine", lat:45.3, lng:-69.4 },
+  { name:"Maryland", lat:39.0, lng:-76.6 },
+  { name:"Massachusetts", lat:42.2, lng:-71.5 },
+  { name:"Michigan", lat:44.3, lng:-84.5 },
+  { name:"Minnesota", lat:46.7, lng:-94.6 },
+  { name:"Mississippi", lat:32.3, lng:-89.3 },
+  { name:"Missouri", lat:38.6, lng:-91.8 },
+  { name:"Montana", lat:47.0, lng:-109.5 },
+  { name:"Nebraska", lat:41.1, lng:-99.9 },
+  { name:"Nevada", lat:38.8, lng:-116.4 },
+  { name:"New Hampshire", lat:43.2, lng:-71.6 },
+  { name:"New Jersey", lat:40.1, lng:-74.4 },
+  { name:"New Mexico", lat:34.5, lng:-105.9 },
+  { name:"New York", lat:43.3, lng:-74.2 },
+  { name:"North Carolina", lat:35.6, lng:-79.0 },
+  { name:"North Dakota", lat:47.5, lng:-101.0 },
+  { name:"Ohio", lat:40.4, lng:-82.9 },
+  { name:"Oklahoma", lat:35.0, lng:-97.1 },
+  { name:"Oregon", lat:44.6, lng:-120.6 },
+  { name:"Pennsylvania", lat:41.2, lng:-77.2 },
+  { name:"Puerto Rico", lat:18.2, lng:-66.6 },
+  { name:"Rhode Island", lat:41.7, lng:-71.5 },
+  { name:"South Carolina", lat:34.0, lng:-81.2 },
+  { name:"South Dakota", lat:43.9, lng:-99.9 },
+  { name:"Tennessee", lat:35.5, lng:-86.6 },
+  { name:"Texas", lat:31.1, lng:-99.9 },
+  { name:"Utah", lat:39.3, lng:-111.1 },
+  { name:"Vermont", lat:44.0, lng:-72.6 },
+  { name:"Virginia", lat:37.4, lng:-78.6 },
+  { name:"Washington", lat:47.8, lng:-120.7 },
+  { name:"West Virginia", lat:38.6, lng:-80.5 },
+  { name:"Wisconsin", lat:43.8, lng:-89.6 },
+  { name:"Wyoming", lat:43.0, lng:-107.3 },
+];
+
+// ── US STATE DATA (2025 + 2030, ACS/Census) ───────────────────────────────
+const US_STATE_DATA = {
+  "Alabama": { 2025:{year:2025,total:5157699,under18:1132203,a65to79:749449,over80:205717}, 2030:{year:2030,total:5213942,under18:1126771,a65to79:826330,over80:254940} },
+  "Alaska": { 2025:{year:2025,total:740133,under18:174198,a65to79:91090,over80:18325}, 2030:{year:2030,total:751139,under18:179899,a65to79:100669,over80:26484} },
+  "Arizona": { 2025:{year:2025,total:7582384,under18:1585751,a65to79:1152362,over80:338796}, 2030:{year:2030,total:7766236,under18:1638932,a65to79:1355511,over80:451423} },
+  "Arkansas": { 2025:{year:2025,total:3088354,under18:698141,a65to79:440532,over80:122175}, 2030:{year:2030,total:3084796,under18:697640,a65to79:478488,over80:150769} },
+  "California": { 2025:{year:2025,total:39431263,under18:8411338,a65to79:5015840,over80:1509021}, 2030:{year:2030,total:41321454,under18:8645586,a65to79:5815442,over80:1978111} },
+  "Colorado": { 2025:{year:2025,total:5957494,under18:1206847,a65to79:780385,over80:199979}, 2030:{year:2030,total:6387211,under18:1353259,a65to79:892702,over80:286144} },
+  "Connecticut": { 2025:{year:2025,total:3675069,under18:727220,a65to79:540355,over80:172982}, 2030:{year:2030,total:3629971,under18:716900,a65to79:591188,over80:211964} },
+  "Delaware": { 2025:{year:2025,total:1051917,under18:213746,a65to79:179401,over80:48423}, 2030:{year:2030,total:1063673,under18:211937,a65to79:198839,over80:62785} },
+  "District of Columbia": { 2025:{year:2025,total:702250,under18:130018,a65to79:68101,over80:22573}, 2030:{year:2030,total:761820,under18:134473,a65to79:71702,over80:24755} },
+  "Florida": { 2025:{year:2025,total:23372215,under18:4491936,a65to79:3838642,over80:1255711}, 2030:{year:2030,total:23790046,under18:4413994,a65to79:4539577,over80:1521550} },
+  "Georgia": { 2025:{year:2025,total:11180878,under18:2531131,a65to79:1400369,over80:365234}, 2030:{year:2030,total:11534245,under18:2559386,a65to79:1647017,over80:495087} },
+  "Hawaii": { 2025:{year:2025,total:1446146,under18:293560,a65to79:235057,over80:76248}, 2030:{year:2030,total:1529814,under18:298845,a65to79:256754,over80:100337} },
+  "Idaho": { 2025:{year:2025,total:2001619,under18:467247,a65to79:278451,over80:77100}, 2030:{year:2030,total:2066265,under18:498198,a65to79:317088,over80:105662} },
+  "Illinois": { 2025:{year:2025,total:12710158,under18:2692660,a65to79:1755608,over80:518974}, 2030:{year:2030,total:12798928,under18:2692244,a65to79:1907173,over80:633182} },
+  "Indiana": { 2025:{year:2025,total:6924275,under18:1578728,a65to79:956034,over80:262367}, 2030:{year:2030,total:7018843,under18:1614085,a65to79:1046385,over80:336020} },
+  "Iowa": { 2025:{year:2025,total:3241488,under18:727370,a65to79:465624,over80:146979}, 2030:{year:2030,total:3301784,under18:757228,a65to79:514097,over80:180095} },
+  "Kansas": { 2025:{year:2025,total:2970606,under18:686628,a65to79:416438,over80:117336}, 2030:{year:2030,total:3002711,under18:706242,a65to79:453391,over80:150754} },
+  "Kentucky": { 2025:{year:2025,total:4588372,under18:1020211,a65to79:657225,over80:168625}, 2030:{year:2030,total:4633881,under18:1023428,a65to79:718045,over80:217947} },
+  "Louisiana": { 2025:{year:2025,total:4597740,under18:1062537,a65to79:655821,over80:164043}, 2030:{year:2030,total:4752752,under18:1075163,a65to79:709673,over80:212037} },
+  "Maine": { 2025:{year:2025,total:1405012,under18:244679,a65to79:258935,over80:70991}, 2030:{year:2030,total:1388293,under18:250868,a65to79:273581,over80:94331} },
+  "Maryland": { 2025:{year:2025,total:6263220,under18:1368343,a65to79:850825,over80:248927}, 2030:{year:2030,total:6494090,under18:1391545,a65to79:943286,over80:314025} },
+  "Massachusetts": { 2025:{year:2025,total:7136171,under18:1354765,a65to79:1025942,over80:310000}, 2030:{year:2030,total:7409395,under18:1419895,a65to79:1149149,over80:399847} },
+  "Michigan": { 2025:{year:2025,total:10140459,under18:2103755,a65to79:1549650,over80:438209}, 2030:{year:2030,total:10224497,under18:2160337,a65to79:1656237,over80:547926} },
+  "Minnesota": { 2025:{year:2025,total:5793151,under18:1290824,a65to79:812852,over80:243421}, 2030:{year:2030,total:6023698,under18:1348956,a65to79:925657,over80:312580} },
+  "Mississippi": { 2025:{year:2025,total:2943045,under18:671997,a65to79:422020,over80:109327}, 2030:{year:2030,total:2956772,under18:653964,a65to79:473141,over80:143294} },
+  "Missouri": { 2025:{year:2025,total:6245466,under18:1366801,a65to79:910668,over80:258533}, 2030:{year:2030,total:6281703,under18:1378587,a65to79:1001972,over80:321367} },
+  "Montana": { 2025:{year:2025,total:1137233,under18:230015,a65to79:192228,over80:49195}, 2030:{year:2030,total:1159875,under18:246472,a65to79:203066,over80:67657} },
+  "Nebraska": { 2025:{year:2025,total:2005466,under18:479649,a65to79:269552,over80:78500}, 2030:{year:2030,total:2067878,under18:501190,a65to79:299419,over80:100028} },
+  "Nevada": { 2025:{year:2025,total:3267467,under18:687705,a65to79:457631,over80:117720}, 2030:{year:2030,total:3437890,under18:720462,a65to79:537345,over80:160966} },
+  "New Hampshire": { 2025:{year:2025,total:1409032,under18:248169,a65to79:239017,over80:64215}, 2030:{year:2030,total:1424739,under18:257565,a65to79:269666,over80:86412} },
+  "New Jersey": { 2025:{year:2025,total:9500851,under18:2043575,a65to79:1312827,over80:393838}, 2030:{year:2030,total:9675872,under18:2027213,a65to79:1427458,over80:479644} },
+  "New Mexico": { 2025:{year:2025,total:2130256,under18:443837,a65to79:333629,over80:95604}, 2030:{year:2030,total:2162106,under18:461823,a65to79:373423,over80:122654} },
+  "New York": { 2025:{year:2025,total:19867248,under18:3972535,a65to79:2852162,over80:905011}, 2030:{year:2030,total:20836092,under18:4168202,a65to79:3052346,over80:1073333} },
+  "North Carolina": { 2025:{year:2025,total:11046024,under18:2349516,a65to79:1558027,over80:422663}, 2030:{year:2030,total:11160159,under18:2347461,a65to79:1774071,over80:569788} },
+  "North Dakota": { 2025:{year:2025,total:796568,under18:178027,a65to79:104788,over80:35507}, 2030:{year:2030,total:867403,under18:208805,a65to79:117442,over80:38354} },
+  "Ohio": { 2025:{year:2025,total:11883304,under18:2568566,a65to79:1768823,over80:502574}, 2030:{year:2030,total:11999653,under18:2597463,a65to79:1916051,over80:637406} },
+  "Oklahoma": { 2025:{year:2025,total:4095393,under18:963347,a65to79:538447,over80:153634}, 2030:{year:2030,total:4121121,under18:965777,a65to79:599924,over80:186930} },
+  "Oregon": { 2025:{year:2025,total:4272371,under18:825249,a65to79:659416,over80:190801}, 2030:{year:2030,total:4563425,under18:901590,a65to79:728049,over80:262261} },
+  "Pennsylvania": { 2025:{year:2025,total:13078751,under18:2624989,a65to79:2046560,over80:619414}, 2030:{year:2030,total:13231491,under18:2674163,a65to79:2229058,over80:760815} },
+  "Puerto Rico": { 2025:{year:2025,total:3203295,under18:480726,a65to79:566282,over80:223232} },
+  "Rhode Island": { 2025:{year:2025,total:1112308,under18:203536,a65to79:167126,over80:53042}, 2030:{year:2030,total:1131942,under18:215302,a65to79:185846,over80:64045} },
+  "South Carolina": { 2025:{year:2025,total:5478831,under18:1149839,a65to79:863028,over80:219696}, 2030:{year:2030,total:5514501,under18:1142920,a65to79:953817,over80:308683} },
+  "South Dakota": { 2025:{year:2025,total:924669,under18:217535,a65to79:136636,over80:39266}, 2030:{year:2030,total:944259,under18:227019,a65to79:150341,over80:49908} },
+  "Tennessee": { 2025:{year:2025,total:7227750,under18:1576399,a65to79:1007458,over80:266521}, 2030:{year:2030,total:7359519,under18:1591685,a65to79:1125402,over80:352905} },
+  "Texas": { 2025:{year:2025,total:31290831,under18:7657490,a65to79:3462895,over80:902574}, 2030:{year:2030,total:32463602,under18:7758610,a65to79:4189497,over80:1226426} },
+  "Utah": { 2025:{year:2025,total:3503613,under18:932753,a65to79:345047,over80:89875}, 2030:{year:2030,total:3699050,under18:1016377,a65to79:404835,over80:126936} },
+  "Vermont": { 2025:{year:2025,total:648493,under18:112028,a65to79:115410,over80:33075}, 2030:{year:2030,total:656319,under18:120487,a65to79:122077,over80:41920} },
+  "Virginia": { 2025:{year:2025,total:8811195,under18:1874030,a65to79:1210185,over80:340200}, 2030:{year:2030,total:9129002,under18:1944039,a65to79:1348432,over80:444313} },
+  "Washington": { 2025:{year:2025,total:7958180,under18:1652049,a65to79:1085046,over80:293462}, 2030:{year:2030,total:8512355,under18:1815411,a65to79:1229984,over80:413651} },
+  "West Virginia": { 2025:{year:2025,total:1769979,under18:347578,a65to79:305456,over80:81395}, 2030:{year:2030,total:1750206,under18:344540,a65to79:307906,over80:100336} },
+  "Wisconsin": { 2025:{year:2025,total:5960975,under18:1233276,a65to79:914415,over80:256627}, 2030:{year:2030,total:6052525,under18:1278711,a65to79:1021275,over80:334931} },
+  "Wyoming": { 2025:{year:2025,total:587618,under18:124986,a65to79:94147,over80:23226}, 2030:{year:2030,total:586925,under18:133566,a65to79:95819,over80:30040} },
+};
+
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 // Country name → ISO 3166-1 alpha-3 for Mapbox boundary matching
@@ -1670,6 +1782,9 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
   const [hover, setHover] = useState(null);
   const [pinned, setPinned] = useState(null);
   const prevRegion = useRef(region);
+  const [hoveredState, setHoveredState] = useState(null);
+  const [pinnedState, setPinnedState] = useState(null);
+
 
   const metricVal = (name) => {
     const cd = COUNTRIES[name]; if (!cd) return null;
@@ -1764,6 +1879,49 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
       if (cen) m.flyTo({center:[cen[0],cen[1]],zoom:cen[2],duration:800});
       setPinned(p=>p===name?null:name);
     });
+
+      // ── US STATE MARKERS ──────────────────────────────────────────────────
+      m.on("load", () => {
+        const stateFeatures = US_STATE_CENTROIDS.map(s => ({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [s.lng, s.lat] },
+          properties: { name: s.name },
+        }));
+        m.addSource("us-states", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: stateFeatures },
+        });
+        m.addLayer({
+          id: "state-dots",
+          type: "circle",
+          source: "us-states",
+          paint: {
+            "circle-radius": ["interpolate",["linear"],["zoom"],3,3,8,7],
+            "circle-color": "#3C3B6E",
+            "circle-stroke-width": 1.5,
+            "circle-stroke-color": "#fff",
+            "circle-opacity": 0.85,
+          },
+        });
+      });
+      m.on("mouseenter","state-dots",(e) => {
+        if (!e.features||!e.features.length) return;
+        m.getCanvas().style.cursor = "pointer";
+        setHoveredState(e.features[0].properties.name);
+      });
+      m.on("mouseleave","state-dots",() => {
+        m.getCanvas().style.cursor = "";
+        setHoveredState(null);
+      });
+      m.on("click","state-dots",(e) => {
+        if (!e.features||!e.features.length) return;
+        e.preventDefault();
+        const name = e.features[0].properties.name;
+        const st = US_STATE_CENTROIDS.find(s=>s.name===name);
+        if (st) m.flyTo({ center:[st.lng,st.lat], zoom:6, duration:800 });
+        setPinnedState(p => p===name?null:name);
+      });
+
     mapRef.current = m;
     return () => { m.remove(); mapRef.current=null; };
   }, []);
@@ -1853,6 +2011,41 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
           )}
         </div>
       )}
+
+      {/* US State popup */}
+      {(hoveredState||pinnedState) && US_STATE_DATA[hoveredState||pinnedState] && (() => {
+        const sName = hoveredState||pinnedState;
+        const sRow = US_STATE_DATA[sName][2025];
+        const aging = sRow ? (((sRow.a65to79||0)+(sRow.over80||0))/sRow.total*100).toFixed(1) : "—";
+        return (
+          <div style={{
+            position:"absolute",top:46,right:10,zIndex:21,
+            background:C.navy,borderRadius:12,padding:"12px 14px",minWidth:170,
+            boxShadow:"0 10px 28px rgba(11,31,58,0.4)",border:`1px solid #3C3B6E`,
+            pointerEvents:pinnedState?"auto":"none",
+          }}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,paddingBottom:7,borderBottom:`1px solid rgba(255,255,255,0.14)`}}>
+              <span style={{fontSize:16}}>🇺🇸</span>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:0.8,color:"#fff",lineHeight:1}}>{sName}</div>
+                <div style={{fontFamily:"system-ui",fontSize:9,color:"rgba(255,255,255,0.55)",marginTop:2}}>United States · 2025</div>
+              </div>
+              {pinnedState && <button onClick={e=>{e.stopPropagation();setPinnedState(null);}} style={{border:"none",background:"rgba(255,255,255,0.12)",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:14,lineHeight:1}}>×</button>}
+            </div>
+            {[
+              {k:"Total pop", v:sRow.total.toLocaleString(), col:"#fff"},
+              {k:"65+ share", v:aging+"%", col:"#F5A623"},
+              {k:"80+ pop", v:(sRow.over80||0).toLocaleString(), col:"#fff"},
+            ].map(r=>(
+              <div key={r.k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:14,marginBottom:4}}>
+                <span style={{fontFamily:"system-ui",fontSize:10,color:"rgba(255,255,255,0.6)"}}>{r.k}</span>
+                <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:0.5,color:r.col}}>{r.v}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
     </div>
   );
 }

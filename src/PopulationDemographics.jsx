@@ -836,27 +836,40 @@ function ChartModal({ data, onClose }) {
       onClick={onClose}
       style={{
         position:"fixed", inset:0, zIndex:1000,
-        background:"rgba(11,31,58,0.55)", backdropFilter:"blur(2px)",
-        display:"flex", alignItems:"center", justifyContent:"center", padding:16,
+        background:"rgba(11,31,58,0.72)", backdropFilter:"blur(4px)",
+        display:"flex", alignItems:"flex-end", justifyContent:"center",
       }}
     >
       <div
         onClick={e=>e.stopPropagation()}
         style={{
-          background:"#fff", borderRadius:16, border:`1px solid ${C.border}`,
-          boxShadow:"0 20px 60px rgba(11,31,58,0.4)",
-          width:"100%", maxWidth:680, maxHeight:"88vh", overflowY:"auto",
-          padding:"16px 18px 20px",
+          background:"#fff", borderRadius:"20px 20px 0 0",
+          boxShadow:"0 -8px 40px rgba(11,31,58,0.35)",
+          width:"100%", maxWidth:720, maxHeight:"90vh", overflowY:"auto",
+          paddingBottom:32,
         }}
       >
-        <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12}}>
-          <div style={{fontFamily:"'Bebas Neue',sans-serif", fontSize:16, letterSpacing:2, color:C.navy}}>{data.title || "CHART"}</div>
+        {/* Handle bar */}
+        <div style={{display:"flex",justifyContent:"center",paddingTop:10,paddingBottom:6}}>
+          <div style={{width:40,height:4,borderRadius:2,background:C.border}}/>
+        </div>
+        {/* Header */}
+        <div style={{
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          padding:"10px 18px 12px", borderBottom:`1px solid ${C.border}`,
+          marginBottom:16,
+        }}>
+          <div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:C.navy,lineHeight:1}}>{data.title||"CHART"}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.teal,marginTop:2}}>LIGHTHOUSE POPULATION ANALYTICS</div>
+          </div>
           <button onClick={onClose} style={{
-            border:`1px solid ${C.border}`, background:"#F4F8FC", borderRadius:8,
-            width:30, height:30, cursor:"pointer", fontSize:16, color:C.sub, lineHeight:1,
+            border:`1px solid ${C.border}`, background:C.bg, borderRadius:10,
+            width:34, height:34, cursor:"pointer", fontSize:18, color:C.navy,
+            lineHeight:1, display:"flex", alignItems:"center", justifyContent:"center",
           }}>×</button>
         </div>
-        <div>{data.node}</div>
+        <div style={{padding:"0 16px"}}>{data.node}</div>
       </div>
     </div>
   );
@@ -934,13 +947,13 @@ function Donut({ segments, size=130, centerLabel, centerSub, interactive=false, 
         {!act ? (
           <div style={{display:"flex",flexDirection:"column",justifyContent:"center",height:"100%",minHeight:120,textAlign:"center"}}>
             <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:1.5,color:"rgba(255,255,255,0.85)",marginBottom:6}}>AGE BAND DETAIL</div>
-            <div style={{fontFamily:"system-ui",fontSize:14,color:"rgba(255,255,255,0.5)",lineHeight:1.5}}>Tap any slice of the donut to see its population, share of mix, 2030 projection and growth rate.</div>
+            <div style={{fontFamily:"system-ui",fontSize:14,color:"rgba(255,255,255,0.82)",lineHeight:1.5}}>Tap any slice of the donut to see its population, share of mix, 2030 projection and growth rate.</div>
             {/* mini legend */}
             <div style={{display:"flex",flexWrap:"wrap",gap:"5px 10px",justifyContent:"center",marginTop:12}}>
               {slices.map(s=>(
                 <div key={s.seg.label} onClick={()=>setActive(s.idx)} style={{display:"flex",alignItems:"center",gap:4,cursor:"pointer"}}>
                   <span style={{width:8,height:8,borderRadius:2,background:s.seg.color}}/>
-                  <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.7)"}}>{s.seg.label}</span>
+                  <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.92)"}}>{s.seg.label}</span>
                 </div>
               ))}
             </div>
@@ -951,7 +964,7 @@ function Donut({ segments, size=130, centerLabel, centerSub, interactive=false, 
               <span style={{width:14,height:14,borderRadius:4,background:act.seg.color,flexShrink:0}}/>
               <div>
                 <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:1,color:"#fff",lineHeight:1}}>{act.seg.label}</div>
-                <div style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.55)",marginTop:2}}>{act.seg.range||"age band"}</div>
+                <div style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.85)",marginTop:2}}>{act.seg.range||"age band"}</div>
               </div>
             </div>
             {[
@@ -962,7 +975,7 @@ function Donut({ segments, size=130, centerLabel, centerSub, interactive=false, 
                 c:act.seg.cagr2530>0?C.green:act.seg.cagr2530<0?"#FF8A8A":"rgba(255,255,255,0.7)"},
             ].map(row=>(
               <div key={row.k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:12,marginBottom:7}}>
-                <span style={{fontFamily:"system-ui",fontSize:14,color:"rgba(255,255,255,0.6)"}}>{row.k}</span>
+                <span style={{fontFamily:"system-ui",fontSize:14,color:"rgba(255,255,255,0.88)"}}>{row.k}</span>
                 <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:0.5,color:row.c}}>{row.v}</span>
               </div>
             ))}
@@ -1109,7 +1122,7 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
             </div>
             {hv.s.ageLabel && hv.s.ageLabel!==hv.s.label && (
               <div style={{display:"flex",justifyContent:"space-between",gap:12,marginBottom:4}}>
-                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.6)"}}>Series</span>
+                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>Series</span>
                 <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color:"#fff"}}>{hv.s.label}</span>
               </div>
             )}
@@ -1119,7 +1132,7 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
               {k:"CAGR → 2030", v:`${g>0?"+":""}${g.toFixed(2)}%`, c:gc},
             ].map(row=>(
               <div key={row.k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:14,marginBottom:3}}>
-                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.6)"}}>{row.k}</span>
+                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>{row.k}</span>
                 <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:0.5,color:row.c}}>{row.v}</span>
               </div>
             ))}
@@ -1490,7 +1503,7 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
               )}
             >
               <div>
-                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:6,textAlign:"center"}}>AGE DISTRIBUTION {year}</div>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6,textAlign:"center"}}>AGE DISTRIBUTION {year}</div>
                 <Donut
                   segments={donutSegs}
                   size={110}
@@ -1519,7 +1532,7 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
           {/* Age distribution curve */}
           <div style={{marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6,flexWrap:"wrap",gap:6}}>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub}}>AGE DISTRIBUTION {[year,...compareYears].length>1 ? `${Math.min(year,...compareYears)}–${Math.max(year,...compareYears)}` : year}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy}}>AGE DISTRIBUTION {[year,...compareYears].length>1 ? `${Math.min(year,...compareYears)}–${Math.max(year,...compareYears)}` : year}</div>
               <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                 <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1,color:C.sub}}>COMPARE:</span>
                 {YEARS.filter(y=>y!==year).map(y=>{
@@ -1553,7 +1566,7 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
                   onZoom={onZoom}
                   renderLarge={()=><AgeDistributionCurve height={280} series={distSeries}/>}
                 >
-                  <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}><AgeDistributionCurve height={110} series={distSeries}/></div>
+                  <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}><AgeDistributionCurve height={90} series={distSeries}/></div>
                 </Zoomable>
               );
             })()}
@@ -1561,13 +1574,13 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
 
           {/* Trend line */}
           <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:6}}>POPULATION TREND 2005–2035</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6}}>POPULATION TREND 2005–2035</div>
             <Zoomable
               title={`${name} · Population Trend 2005–2035`}
               onZoom={onZoom}
-              renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={360} width={640} showLegend={true}/>}
+              renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={260} width={560} showLegend={true}/>}
             >
-              <TrendLine series={trendSeries} years={YEARS} height={110} showLegend={true}/>
+              <TrendLine series={trendSeries} years={YEARS} height={95} showLegend={true}/>
             </Zoomable>
           </div>
 
@@ -1951,7 +1964,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
     <div style={{position:"relative"}}>
       {/* metric switch */}
       <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-        <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,alignSelf:"center"}}>SHADE BY</span>
+        <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,alignSelf:"center"}}>SHADE BY</span>
         {[{id:"aging",l:"65+ Share"},{id:"total",l:"Total Pop"},{id:"cagr",l:"65+ CAGR"}].map(m=>(
           <button key={m.id} onClick={()=>onMetricChange(m.id)} style={{
             border:metric===m.id?`1.5px solid ${C.teal}`:`1px solid ${C.border}`,
@@ -1986,7 +1999,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
             <span style={{fontSize:18}}>{COUNTRIES[hv.name]?.flag}</span>
             <div style={{flex:1}}>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:0.8,color:"#fff",lineHeight:1}}>{hv.name}</div>
-              <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:2}}>{COUNTRIES[hv.name]?.region} · {year}</div>
+              <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:2}}>{COUNTRIES[hv.name]?.region} · {year}</div>
             </div>
             {pinned && (
               <button onClick={(e)=>{e.stopPropagation();setPinned(null);}} style={{border:"none",background:"rgba(255,255,255,0.12)",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:14,lineHeight:1,flexShrink:0}}>×</button>
@@ -1999,7 +2012,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
             {k:"65+ CAGR→35", v:(hvCagr>0?"+":"")+hvCagr.toFixed(2)+"%", c:hvCagr>0?C.green:"#FF8A8A"},
           ].map(row=>(
             <div key={row.k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:14,marginBottom:4}}>
-              <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.6)"}}>{row.k}</span>
+              <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>{row.k}</span>
               <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:0.5,color:row.c}}>{row.v}</span>
             </div>
           ))}
@@ -2028,7 +2041,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
               <span style={{fontSize:16}}>🇺🇸</span>
               <div style={{flex:1}}>
                 <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:0.8,color:"#fff",lineHeight:1}}>{sName}</div>
-                <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:2}}>United States · 2025</div>
+                <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:2}}>United States · 2025</div>
               </div>
               {pinnedState && <button onClick={e=>{e.stopPropagation();setPinnedState(null);}} style={{border:"none",background:"rgba(255,255,255,0.12)",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:14,lineHeight:1}}>×</button>}
             </div>
@@ -2038,7 +2051,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
               {k:"80+ pop", v:(sRow.over80||0).toLocaleString(), col:"#fff"},
             ].map(r=>(
               <div key={r.k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:14,marginBottom:4}}>
-                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.6)"}}>{r.k}</span>
+                <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>{r.k}</span>
                 <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:0.5,color:r.col}}>{r.v}</span>
               </div>
             ))}
@@ -2381,7 +2394,7 @@ export default function PopulationDemographics() {
 
           {/* Row 1: Region */}
           <div style={{marginBottom:10}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:6}}>REGION</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6}}>REGION</div>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {Object.keys(REGIONS).map(r=>{
                 const active = region===r;
@@ -2403,7 +2416,7 @@ export default function PopulationDemographics() {
 
           {/* Row 2: Gender */}
           <div style={{marginBottom:10}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:6}}>GENDER</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6}}>GENDER</div>
             <div style={{display:"flex",gap:6}}>
               {GENDER_CHIPS.map(g=>{
                 const active=genderFilter===g;
@@ -2423,7 +2436,7 @@ export default function PopulationDemographics() {
 
           {/* Row 3: Age Groups */}
           <div style={{marginBottom:10}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:6}}>AGE GROUPS</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6}}>AGE GROUPS</div>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {AGE_CHIPS.map(a=>{
                 const active=chipActive(a);
@@ -2498,7 +2511,7 @@ export default function PopulationDemographics() {
                   {label:"80+",     value:fmt(regionNow.over80), color:C.red},
                 ].map(({label,value,color})=>(
                   <div key={label} style={{background:"rgba(255,255,255,0.07)",borderRadius:8,padding:"8px 4px",textAlign:"center",borderTop:`2px solid ${color}`}}>
-                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:"rgba(255,255,255,0.5)",marginBottom:2}}>{label}</div>
+                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:"rgba(255,255,255,0.82)",marginBottom:2}}>{label}</div>
                     <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color,letterSpacing:0.5,lineHeight:1}}>{value}</div>
                   </div>
                 ))}
@@ -2541,7 +2554,7 @@ export default function PopulationDemographics() {
                   </div>
                 </div>
                 <div>
-                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:"rgba(255,255,255,0.4)",marginBottom:8}}>KEY INDICATORS</div>
+                  <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:"rgba(255,255,255,0.75)",marginBottom:8}}>KEY INDICATORS</div>
                   {[
                     {label:"65+ Population", value:fmt(regionNow.over65), color:C.amber},
                     {label:"80+ Population", value:fmt(regionNow.over80), color:C.red},
@@ -2549,7 +2562,7 @@ export default function PopulationDemographics() {
                     {label:"Working Age",    value:((regionNow.a18to64/regionNow.total)*100).toFixed(1)+"%", color:C.teal},
                   ].map(({label,value,color})=>(
                     <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                      <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.6)"}}>{label}</span>
+                      <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>{label}</span>
                       <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color,letterSpacing:0.5}}>{value}</span>
                     </div>
                   ))}
@@ -2559,16 +2572,16 @@ export default function PopulationDemographics() {
 
             {/* Regional trend bar */}
             <div style={{background:"rgba(0,0,0,0.2)",padding:"10px 16px 4px",borderTop:`1px solid rgba(255,255,255,0.08)`,position:"relative"}}>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:"rgba(255,255,255,0.4)",marginBottom:4}}>65+ TREND</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:"rgba(255,255,255,0.75)",marginBottom:4}}>65+ TREND</div>
               <button
                 onClick={()=>openZoom({title:`${region} · 65+ Population Trend`, node:(
-                  <PopBarChart big data={REGIONS[region]?.data.map(d=>({year:d.y,value:d.a65to79+d.over80,color:C.amber}))||[]} highlightYear={selectedYear}/>
+                  <PopBarChart data={REGIONS[region]?.data.map(d=>({year:d.y,value:d.a65to79+d.over80,color:C.amber}))||[]} highlightYear={selectedYear}/>
                 )})}
                 title="Enlarge chart"
                 style={{position:"absolute",top:8,right:10,zIndex:2,border:"1px solid rgba(255,255,255,0.3)",background:"rgba(255,255,255,0.12)",borderRadius:7,width:22,height:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,color:"#fff",lineHeight:1,padding:0}}
               >⤢</button>
               <div onClick={()=>openZoom({title:`${region} · 65+ Population Trend`, node:(
-                  <PopBarChart big data={REGIONS[region]?.data.map(d=>({year:d.y,value:d.a65to79+d.over80,color:C.amber}))||[]} highlightYear={selectedYear}/>
+                  <PopBarChart data={REGIONS[region]?.data.map(d=>({year:d.y,value:d.a65to79+d.over80,color:C.amber}))||[]} highlightYear={selectedYear}/>
                 )})} style={{cursor:"zoom-in"}}>
                 <PopBarChart
                   data={REGIONS[region]?.data.map(d=>({year:d.y,value:d.a65to79+d.over80,color:C.amber}))||[]}
@@ -2581,7 +2594,7 @@ export default function PopulationDemographics() {
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {activeTab === "map" && (
-          <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"14px 16px",boxShadow:"0 2px 10px rgba(11,31,58,0.06)"}}>
+          <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"12px 12px",boxShadow:"0 1px 6px rgba(11,31,58,0.06)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:6}}>
               <div>
                 <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:2,color:C.navy}}>DEMOGRAPHIC MAP</div>
@@ -2718,7 +2731,7 @@ export default function PopulationDemographics() {
 
             {/* ── TREND CHART ── */}
             {trendSeries.length > 0 && (
-              <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"14px 16px",boxShadow:"0 2px 10px rgba(11,31,58,0.06)"}}>
+              <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"12px 12px",boxShadow:"0 1px 6px rgba(11,31,58,0.06)"}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
                   <div>
                     <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:2,color:C.navy}}>POPULATION TREND</div>
@@ -2730,7 +2743,7 @@ export default function PopulationDemographics() {
                 <Zoomable
                   title="Population Trend 2005–2035"
                   onZoom={openZoom}
-                  renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={360} width={640} showLegend={true}/>}
+                  renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={260} width={560} showLegend={true}/>}
                 >
                   <TrendLine series={trendSeries} years={YEARS} height={130} showLegend={true}/>
                 </Zoomable>
@@ -2866,7 +2879,7 @@ export default function PopulationDemographics() {
 
             {/* ── AGEING COMPARISON BAR CHART ── */}
             {sortedRows.length > 1 && (
-              <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"14px 16px",boxShadow:"0 2px 10px rgba(11,31,58,0.06)"}}>
+              <div style={{marginTop:12,background:"#fff",borderRadius:14,border:`1px solid ${C.border}`,padding:"12px 12px",boxShadow:"0 1px 6px rgba(11,31,58,0.06)"}}>
                 <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:2,color:C.navy,marginBottom:4}}>65+ AGEING INDEX COMPARISON</div>
                 <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:2,color:C.sub,marginBottom:12}}>% OF TOTAL POPULATION AGED 65+</div>
                 {[...sortedRows].sort((a,b)=>parseFloat(b.agingPct)-parseFloat(a.agingPct)).map(row=>{

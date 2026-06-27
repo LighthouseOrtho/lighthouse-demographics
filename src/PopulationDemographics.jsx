@@ -989,7 +989,7 @@ function Donut({ segments, size=130, centerLabel, centerSub, interactive=false, 
 // ── POPULATION BAR CHART ──────────────────────────────────────────────────────
 function PopBarChart({ data, genderFilter, ageGroups, highlightYear, big=false }) {
   const maxVal = Math.max(...data.map(d => d.value), 1);
-  const H = big ? 300 : 90, barMax = big ? 250 : 72, lblFs = big ? 11 : 7, valFs = big ? 11 : 7, valTop = big ? -20 : -16;
+  const H = big ? 280 : 110, barMax = big ? 240 : 86, lblFs = big ? 14 : 12, valFs = big ? 14 : 12, valTop = big ? -20 : -14;
   return (
     <div style={{display:"flex", alignItems:"flex-end", gap:big?8:4, height:H, paddingBottom:big?26:18, position:"relative"}}>
       {data.map((d, i) => {
@@ -1048,7 +1048,7 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
           return (
             <g key={pct}>
               <line x1={padL} y1={y} x2={w-padR} y2={y} stroke={C.border} strokeWidth="0.5"/>
-              <text x={padL-4} y={y+3} textAnchor="end" fontSize="7.5" fill={C.sub} fontFamily="system-ui">{fmt(v)}</text>
+              <text x={padL-4} y={y+3} textAnchor="end" fontSize="10" fill={C.sub} fontFamily="system-ui">{fmt(v)}</text>
             </g>
           );
         })}
@@ -1081,8 +1081,8 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
           const col = g > 0 ? C.green2 : g < 0 ? C.red : C.amber;
           return (
             <g key={"c"+si}>
-              <text x={w-padR+4} y={lastY-1} fontSize="9" fontWeight="700" fill={col} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.3">{g>0?"+":""}{g.toFixed(2)}%</text>
-              <text x={w-padR+4} y={lastY+7} fontSize="5.5" fill={C.sub} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">CAGR→30</text>
+              <text x={w-padR+4} y={lastY-1} fontSize="12" fontWeight="700" fill={col} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.3">{g>0?"+":""}{g.toFixed(2)}%</text>
+              <text x={w-padR+4} y={lastY+7} fontSize="9" fill={C.sub} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">CAGR→30</text>
             </g>
           );
         })}
@@ -1096,11 +1096,11 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
         )))}
         {/* X axis labels */}
         {years.map((y, i) => (
-          <text key={y} x={toX(i)} y={h-padB+12} textAnchor="middle" fontSize="7.5" fill={hv&&hv.i===i?C.navy:C.sub} fontWeight={hv&&hv.i===i?700:400} fontFamily="system-ui">{y}</text>
+          <text key={y} x={toX(i)} y={h-padB+12} textAnchor="middle" fontSize="10" fill={hv&&hv.i===i?C.navy:C.sub} fontWeight={hv&&hv.i===i?700:400} fontFamily="system-ui">{y}</text>
         ))}
         {/* Projection label */}
         {years.includes(2025) && (
-          <text x={toX(years.indexOf(2025))+4} y={padT+8} fontSize="6" fill={C.amber} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">PROJECTED ▶</text>
+          <text x={toX(years.indexOf(2025))+4} y={padT+8} fontSize="9" fill={C.amber} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">PROJECTED ▶</text>
         )}
       </svg>
 
@@ -1264,7 +1264,7 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
           return (
             <g key={p}>
               <line x1={padL} y1={y} x2={w-padR} y2={y} stroke={C.border} strokeWidth="0.5"/>
-              <text x={padL-5} y={y+3} textAnchor="end" fontSize="9" fill={C.sub} fontFamily="system-ui">{fmt(Math.round(val))}</text>
+              <text x={padL-5} y={y+3} textAnchor="end" fontSize="11" fill={C.sub} fontFamily="system-ui">{fmt(Math.round(val))}</text>
             </g>
           );
         })}
@@ -1279,7 +1279,7 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
             <g key={b.key}>
               <rect x={cx(i)-barW/2} y={y} width={barW} height={barH} rx="2" fill={b.color} opacity="0.85"/>
               {/* population sits inside the column near the base */}
-              <text x={cx(i)} y={inside ? baseY-7 : y-6} textAnchor="middle" fontSize="11" fontWeight="700"
+              <text x={cx(i)} y={inside ? baseY-7 : y-6} textAnchor="middle" fontSize="12" fontWeight="700"
                 fill={inside ? "#fff" : b.color} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">{fmt(v)}</text>
             </g>
           );
@@ -1302,7 +1302,7 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
                   <g key={i}>
                     <line x1={cx(i)-markW/2} y1={y} x2={cx(i)+markW/2} y2={y}
                       stroke={s.color} strokeWidth="2.5" strokeLinecap="round"/>
-                    <text x={cx(i)} y={labelY} textAnchor="middle" fontSize="9.5" fontWeight="700" fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.3"
+                    <text x={cx(i)} y={labelY} textAnchor="middle" fontSize="11" fontWeight="700" fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.3"
                       fill={up?C.green2:pct<0?C.red:C.sub}>{up?"+":""}{pct.toFixed(1)}%</text>
                   </g>
                 );
@@ -1312,20 +1312,20 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
         })}
         {/* x-axis band labels */}
         {BANDS.map((b,i)=>(
-          <text key={b.key} x={cx(i)} y={h-padB+15} textAnchor="middle" fontSize="11" fontWeight="700" fill={C.navy} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">{b.label}</text>
+          <text key={b.key} x={cx(i)} y={h-padB+15} textAnchor="middle" fontSize="13" fontWeight="700" fill={C.navy} fontFamily="'Bebas Neue',sans-serif" letterSpacing="0.5">{b.label}</text>
         ))}
-        <text x={padL+plotW/2} y={h-2} textAnchor="middle" fontSize="8.5" fill={C.sub} fontFamily="'Bebas Neue',sans-serif" letterSpacing="1">AGE BAND · √ SCALE</text>
+        <text x={padL+plotW/2} y={h-2} textAnchor="middle" fontSize="10" fill={C.sub} fontFamily="'Bebas Neue',sans-serif" letterSpacing="1">AGE BAND · √ SCALE</text>
       </svg>
       {/* legend */}
       <div style={{display:"flex",flexWrap:"wrap",gap:"4px 14px",justifyContent:"center",marginTop:4}}>
         <div style={{display:"flex",alignItems:"center",gap:5}}>
           <div style={{width:14,height:11,borderRadius:2,background:`linear-gradient(90deg,${C.green},${C.teal},${C.amber},${C.red})`,opacity:0.85}}/>
-          <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:0.5,color:C.navy}}>{primary.year} (selected)</span>
+          <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:0.5,color:C.navy}}>{primary.year} (selected)</span>
         </div>
         {compares.map((s,i)=>(
           <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
             <div style={{width:18,height:0,borderTop:`2.5px solid ${s.color}`}}/>
-            <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:0.5,color:C.sub}}>{s.year} · Δ% vs {primary.year}</span>
+            <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:0.5,color:C.sub}}>{s.year} · Δ% vs {primary.year}</span>
           </div>
         ))}
       </div>
@@ -1483,105 +1483,99 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
       {/* EXPANDED DETAIL */}
       {expanded && (
         <div style={{borderTop:`1px solid ${C.border}`,padding:"14px 14px 18px"}}>
-          {/* Donut + Pyramid side by side */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16,alignItems:"start"}}>
-            <Zoomable
-              title={`${name} · Age Distribution ${year}`}
-              onZoom={onZoom}
-              renderLarge={()=>(
-                <div>
-                  <Donut interactive year={year} segments={donutSegs} size={240} centerLabel={agingIndex+"%"} centerSub="aged 65+"/>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:12}}>
-                    {[{l:"<18",c:C.green},{l:"18-64",c:C.teal},{l:"65-79",c:C.amber},{l:"80+",c:C.red}].map(({l,c})=>(
-                      <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
-                        <div style={{width:11,height:11,borderRadius:3,background:c}}/>
-                        <span style={{fontFamily:"system-ui",fontSize:15,color:C.sub}}>{l}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            >
-              <div>
-                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6,textAlign:"center"}}>AGE DISTRIBUTION {year}</div>
-                <Donut
-                  segments={donutSegs}
-                  size={110}
-                  centerLabel={agingIndex+"%"}
-                  centerSub="aged 65+"
-                />
-                <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",marginTop:8}}>
-                  {[{l:"<18",c:C.green},{l:"18-64",c:C.teal},{l:"65-79",c:C.amber},{l:"80+",c:C.red}].map(({l,c})=>(
-                    <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
-                      <div style={{width:7,height:7,borderRadius:2,background:c}}/>
-                      <span style={{fontFamily:"system-ui",fontSize:11,color:C.sub}}>{l}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Zoomable>
-            <Zoomable
-              title={`${name} · Population Pyramid ${year}`}
-              onZoom={onZoom}
-              renderLarge={()=><div style={{padding:"8px 0"}}><PopPyramid big dataRow={rowNow} title={`PYRAMID ${year}`}/></div>}
-            >
-              <PopPyramid dataRow={rowNow} title={`PYRAMID ${year}`}/>
-            </Zoomable>
-          </div>
+                    {/* ── 4-CHART GRID — all same size, click any to enlarge ── */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
 
-          {/* Age distribution curve */}
-          <div style={{marginBottom:14}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6,flexWrap:"wrap",gap:6}}>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy}}>AGE DISTRIBUTION {[year,...compareYears].length>1 ? `${Math.min(year,...compareYears)}–${Math.max(year,...compareYears)}` : year}</div>
-              <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
-                <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1,color:C.sub}}>COMPARE:</span>
-                {YEARS.filter(y=>y!==year).map(y=>{
-                  const on = compareYears.includes(y);
-                  return (
-                    <button key={y} onClick={(e)=>{e.stopPropagation();setCompareYears(prev=>prev.includes(y)?prev.filter(x=>x!==y):[...prev,y]);}}
-                      style={{
-                        border:on?`1.5px solid ${C.navy}`:`1px solid ${C.border}`,
-                        borderRadius:12,padding:"2px 8px",
-                        background:on?C.navy:"#fff",
-                        fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:0.5,
-                        color:on?"#fff":C.sub,cursor:"pointer",
-                      }}>{y}</button>
-                  );
-                })}
+            {/* 1 — Age Donut */}
+            <div style={{background:"#F4F8FC",borderRadius:12,padding:"10px 8px",display:"flex",flexDirection:"column",alignItems:"center"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:C.navy,marginBottom:6,textAlign:"center"}}>AGE MIX {year}</div>
+              <Zoomable
+                title={`${name} · Age Distribution ${year}`}
+                onZoom={onZoom}
+                renderLarge={()=>(
+                  <div style={{padding:"8px 0"}}>
+                    <Donut interactive year={year} segments={donutSegs} size={240} centerLabel={agingIndex+"%"} centerSub="aged 65+"/>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginTop:12}}>
+                      {[{l:"<18",col:C.green},{l:"18-49",col:C.teal},{l:"50-64",col:C.purple},{l:"65-79",col:C.amber},{l:"80+",col:C.red}].map(({l,col})=>(
+                        <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
+                          <div style={{width:10,height:10,borderRadius:2,background:col}}/>
+                          <span style={{fontFamily:"system-ui",fontSize:12,color:C.navy}}>{l}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              >
+                <Donut segments={donutSegs} size={130} centerLabel={agingIndex+"%"} centerSub="aged 65+"/>
+              </Zoomable>
+              <div style={{display:"flex",flexWrap:"wrap",gap:"3px 8px",justifyContent:"center",marginTop:6}}>
+                {[{l:"<18",col:C.green},{l:"18-49",col:C.teal},{l:"50-64",col:C.purple},{l:"65-79",col:C.amber},{l:"80+",col:C.red}].map(({l,col})=>(
+                  <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
+                    <div style={{width:6,height:6,borderRadius:1,background:col}}/>
+                    <span style={{fontFamily:"system-ui",fontSize:10,color:C.navy}}>{l}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {(()=>{
-              const distSeries = [
-                { year, row:rowNow, color, primary:true },
-                ...compareYears.sort((a,b)=>a-b).map((y,i)=>({
-                  year:y,
-                  row:getDataForYear(countryData.data, y),
-                  color:[C.purple,C.pink,"#3C7AC6",C.green2,C.red2,C.gold2][i%6],
-                })),
-              ];
-              const yrLabel = [year,...compareYears].length>1 ? `${Math.min(year,...compareYears)}–${Math.max(year,...compareYears)}` : `${year}`;
-              return (
-                <Zoomable
-                  title={`${name} · Age Distribution ${yrLabel}`}
-                  onZoom={onZoom}
-                  renderLarge={()=><AgeDistributionCurve height={240} series={distSeries}/>}
-                >
-                  <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}><AgeDistributionCurve height={140} series={distSeries}/></div>
-                </Zoomable>
-              );
-            })()}
-          </div>
 
-          {/* Trend line */}
-          <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,letterSpacing:1.5,color:C.navy,marginBottom:6}}>POPULATION TREND 2005–2035</div>
-            <Zoomable
-              title={`${name} · Population Trend 2005–2035`}
-              onZoom={onZoom}
-              renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={240} width={560} showLegend={true}/>}
-            >
-              <TrendLine series={trendSeries} years={YEARS} height={115} showLegend={true}/>
-            </Zoomable>
+            {/* 2 — Population Pyramid */}
+            <div style={{background:"#F4F8FC",borderRadius:12,padding:"10px 8px"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:C.navy,marginBottom:6,textAlign:"center"}}>AGE PYRAMID {year}</div>
+              <Zoomable
+                title={`${name} · Population Pyramid ${year}`}
+                onZoom={onZoom}
+                renderLarge={()=><div style={{padding:"8px 0"}}><PopPyramid big dataRow={rowNow} title={`PYRAMID ${year}`}/></div>}
+              >
+                <PopPyramid dataRow={rowNow} title=""/>
+              </Zoomable>
+            </div>
+
+            {/* 3 — Age Distribution Bars */}
+            <div style={{background:"#F4F8FC",borderRadius:12,padding:"10px 8px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:C.navy}}>AGE BANDS</div>
+                <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
+                  {YEARS.filter(y=>y!==year).map(y=>{
+                    const on=compareYears.includes(y);
+                    return (
+                      <button key={y} onClick={e=>{e.stopPropagation();setCompareYears(p=>p.includes(y)?p.filter(x=>x!==y):[...p,y]);}}
+                        style={{border:on?`1px solid ${C.navy}`:`1px solid ${C.border}`,borderRadius:8,padding:"1px 5px",background:on?C.navy:"#fff",fontFamily:"'Bebas Neue',sans-serif",fontSize:9,color:on?"#fff":C.sub,cursor:"pointer"}}>
+                        {y}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {(()=>{
+                const distSeries=[
+                  {year,row:rowNow,color,primary:true},
+                  ...compareYears.sort((a,b)=>a-b).map((y,i)=>({year:y,row:getDataForYear(countryData.data,y),color:[C.purple,C.pink,"#3C7AC6",C.green2,C.red2,C.gold2][i%6]})),
+                ];
+                const yrLabel=[year,...compareYears].length>1?`${Math.min(year,...compareYears)}–${Math.max(year,...compareYears)}`:`${year}`;
+                return (
+                  <Zoomable
+                    title={`${name} · Age Distribution ${yrLabel}`}
+                    onZoom={onZoom}
+                    renderLarge={()=><AgeDistributionCurve height={300} series={distSeries}/>}
+                  >
+                    <AgeDistributionCurve height={140} series={distSeries}/>
+                  </Zoomable>
+                );
+              })()}
+            </div>
+
+            {/* 4 — Population Trend */}
+            <div style={{background:"#F4F8FC",borderRadius:12,padding:"10px 8px"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:C.navy,marginBottom:4}}>POP TREND 2005–2035</div>
+              <Zoomable
+                title={`${name} · Population Trend 2005–2035`}
+                onZoom={onZoom}
+                renderLarge={()=><TrendLine series={trendSeries} years={YEARS} height={280} width={540} showLegend={true}/>}
+              >
+                <TrendLine series={trendSeries} years={YEARS} height={140} showLegend={false}/>
+              </Zoomable>
+            </div>
+
           </div>
 
           {/* Key stats grid */}

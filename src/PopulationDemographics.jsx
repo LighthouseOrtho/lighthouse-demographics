@@ -2203,7 +2203,7 @@ export default function PopulationDemographics() {
 
   const mergedCountries = useMemo(() => {
     const out = {};
-    Object.keys(mergedCountries).forEach(name => {
+    Object.keys(COUNTRIES).forEach(name => {
       const rec = liveData.countries.find(r => r.name === name);
       const data = Object.keys(rec.byYear).map(Number).sort((a,b)=>a-b).map(yr => {
         const d = rec.byYear[yr];

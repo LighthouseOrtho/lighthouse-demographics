@@ -742,16 +742,18 @@ function computeProfile(dataRows, ageGroups, genderFilter, year) {
   if (!row) return null;
   const mod = getAgeGroups(genderFilter);
   const u18  = Math.round(row.under18  * mod.u18);
-  const w    = Math.round(row.a18to49 * mod.w);
+  const w    = Math.round(row.a18to49  * mod.w);
+  const p    = Math.round((row.a50to64||0) * mod.p);
   const s    = Math.round(row.a65to79  * mod.s);
   const e    = Math.round(row.over80   * mod.e);
   const over65 = s + e;
   let total = 0;
   if (ageGroups.includes("under18")) total += u18;
-  if (ageGroups.includes("18to64"))  total += w;
+  if (ageGroups.includes("18to49"))  total += w;
+  if (ageGroups.includes("50to64"))  total += p;
   if (ageGroups.includes("65to79"))  total += s;
   if (ageGroups.includes("over80"))  total += e;
-  const breakdown = { under18:u18, a18to64:w, a65to79:s, over80:e, over65 };
+  const breakdown = { under18:u18, a18to49:w, a50to64:p, a65to79:s, over80:e, over65 };
   return { total, breakdown, rawTotal: row.total };
 }
 

@@ -1931,7 +1931,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
 
 
   const metricVal = (name) => {
-    const cd = mergedCountries[name]; if (!cd) return null;
+    const cd = COUNTRIES[name]; if (!cd) return null;
     const row = getDataForYear(cd.data, year);
     const r2025 = getDataForYear(cd.data, 2025), r2035 = cd.data[cd.data.length-1];
     if (!row) return null;
@@ -1947,7 +1947,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
     cagr:  { label:"65+ CAGR 25–35", fmtV:v=>(v>0?"+":"")+v.toFixed(2)+"%" },
   }[metric];
 
-  const allVals = Object.keys(mergedCountries).map(metricVal).filter(v=>v!=null);
+  const allVals = Object.keys(COUNTRIES).map(metricVal).filter(v=>v!=null);
   const lo = Math.min(...allVals), hi = Math.max(...allVals);
 
   const shade = (v) => {
@@ -2018,7 +2018,7 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
       if (!e.features||!e.features.length) return;
       const iso=e.features[0].properties.iso_3166_1_alpha_3;
       const name=ISO_TO_NAME[iso];
-      if (!name||!mergedCountries[name]) return;
+      if (!name||!COUNTRIES[name]) return;
       const cen=CENTROIDS[name];
       if (cen) m.flyTo({center:[cen[0],cen[1]],zoom:cen[2],duration:800});
       setPinned(p=>p===name?null:name);
@@ -2087,9 +2087,9 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
   }, [region]);
 
   const activeName = hover || pinned;
-  const hv = activeName && mergedCountries[activeName] ? { name:activeName } : null;
-  const hvRow = hv ? getDataForYear(mergedCountries[hv.name].data, year) : null;
-  const hvCagr = hv ? (()=>{ const cd=mergedCountries[hv.name]; const a=getDataForYear(cd.data,2025), b=cd.data[cd.data.length-1]; return cagr(a.a65to79+a.over80,b.a65to79+b.over80,10);})() : null;
+  const hv = activeName && COUNTRIES[activeName] ? { name:activeName } : null;
+  const hvRow = hv ? getDataForYear(COUNTRIES[hv.name].data, year) : null;
+  const hvCagr = hv ? (()=>{ const cd=COUNTRIES[hv.name]; const a=getDataForYear(cd.data,2025), b=cd.data[cd.data.length-1]; return cagr(a.a65to79+a.over80,b.a65to79+b.over80,10);})() : null;
 
   return (
     <div style={{position:"relative"}}>
@@ -2127,10 +2127,10 @@ function DemographicMap({ year, metric, onMetricChange, region, onPick, selected
           pointerEvents:pinned?"auto":"none",
         }}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,paddingBottom:7,borderBottom:`1px solid rgba(255,255,255,0.14)`}}>
-            <span style={{fontSize:18}}>{mergedCountries[hv.name]?.flag}</span>
+            <span style={{fontSize:18}}>{COUNTRIES[hv.name]?.flag}</span>
             <div style={{flex:1}}>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,letterSpacing:0.8,color:"#fff",lineHeight:1}}>{hv.name}</div>
-              <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:2}}>{mergedCountries[hv.name]?.region} · {year}</div>
+              <div style={{fontFamily:"system-ui",fontSize:12,color:"rgba(255,255,255,0.85)",marginTop:2}}>{COUNTRIES[hv.name]?.region} · {year}</div>
             </div>
             {pinned && (
               <button onClick={(e)=>{e.stopPropagation();setPinned(null);}} style={{border:"none",background:"rgba(255,255,255,0.12)",color:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",fontSize:14,lineHeight:1,flexShrink:0}}>×</button>
@@ -2201,17 +2201,19 @@ export default function PopulationDemographics() {
   const [activeTab, setActiveTab] = useState("explorer");
   const { data: liveData, loading: liveLoading } = useDemographicsData();
 
-  const mergedCountries = useMemo(() => {
-    const out = {};
-    Object.keys(COUNTRIES).forEach(name => {
-      const rec = liveData.countries.find(r => r.name === name);
+  const [liveVer, setLiveVer] = useState(0);
+  useEffect(() => {
+    liveData.countries.forEach(rec => {
+      const match = Object.keys(COUNTRIES).find(k => k === rec.name);
       const data = Object.keys(rec.byYear).map(Number).sort((a,b)=>a-b).map(yr => {
         const d = rec.byYear[yr];
-        return { y:yr, total:d.total||0, under18:d.under18||0, a18to49:d.age18_49||0, a50to64:d.age50_64||0, a65to79:d.age65_79||0, over80:d.age80plus||0 };
+        return { y:yr, total:d.total||0, under18:d.under18||0,
+          a18to49:d.age18_49||0, a50to64:d.age50_64||0,
+          a65to79:d.age65_79||0, over80:d.age80plus||0 };
       });
-      out[name] = { ...mergedCountries[name], data };
+      COUNTRIES[match].data = data;
     });
-    return out;
+    setLiveVer(v => v + 1);
   }, [liveData]);
 
  // explorer | profiles
@@ -2249,8 +2251,8 @@ export default function PopulationDemographics() {
 
   // ── COUNTRY LIST FOR REGION ────────────────────────────────────────────────
   const availableCountries = useMemo(() => {
-    if (region === "Global") return Object.keys(mergedCountries);
-    return REGIONS[region]?.countries.filter(c => mergedCountries[c]) || [];
+    if (region === "Global") return Object.keys(COUNTRIES);
+    return REGIONS[region]?.countries.filter(c => COUNTRIES[c]) || [];
   }, [region]);
 
   const filteredCountriesList = useMemo(() => {
@@ -2284,7 +2286,7 @@ export default function PopulationDemographics() {
   const tableRows = useMemo(() => {
     return activeCountries
       .map(name => {
-        const cd = mergedCountries[name];
+        const cd = COUNTRIES[name];
         if (!cd) return null;
         const rowNow  = getDataForYear(cd.data, selectedYear);
         const row2005 = cd.data[0];
@@ -2337,7 +2339,7 @@ export default function PopulationDemographics() {
   };
   const projectionRows = useMemo(() => {
     return activeCountries.map(name => {
-      const cd = mergedCountries[name];
+      const cd = COUNTRIES[name];
       if (!cd) return null;
       const v2025 = selectedBandsValue(getDataForYear(cd.data, 2025));
       const v2030 = selectedBandsValue(getDataForYear(cd.data, 2030));
@@ -2406,7 +2408,7 @@ export default function PopulationDemographics() {
     const BL = { under18:"<18", "18to64":"18–64", "65to79":"65–79", over80:"80+" };
     const aLabel = ["under18","18to64","65to79","over80"].filter(b=>ageGroups.includes(b)).map(b=>BL[b]).join(" + ");
     return activeCountries.slice(0,6).map(name => {
-      const cd = mergedCountries[name];
+      const cd = COUNTRIES[name];
       if (!cd) return null;
       return {
         label: name,
@@ -2782,7 +2784,7 @@ export default function PopulationDemographics() {
                   {activeCountries.length>0 ? (
                     <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
                       {activeCountries.slice(0,6).map(n=>{
-                        const cd=mergedCountries[n];
+                        const cd=COUNTRIES[n];
                         return (
                           <span key={n} style={{display:"inline-flex",alignItems:"center",gap:3,background:`${cd.color}18`,border:`1px solid ${cd.color}55`,borderRadius:14,padding:"2px 7px",fontFamily:"system-ui",fontSize:13,color:C.navy}}>
                             <span style={{fontSize:14}}>{cd.flag}</span>{n}
@@ -2837,7 +2839,7 @@ export default function PopulationDemographics() {
                         <div style={{fontFamily:"system-ui",fontSize:15,color:C.sub,textAlign:"center",padding:"16px"}}>No countries match “{countrySearch}”.</div>
                       )}
                       {filteredCountriesList.map(name=>{
-                        const cd=mergedCountries[name]; if(!cd) return null;
+                        const cd=COUNTRIES[name]; if(!cd) return null;
                         const checked = selectedCountries.includes(name);
                         return (
                           <label key={name} onClick={()=>toggleCountry(name)} style={{
@@ -3135,7 +3137,7 @@ export default function PopulationDemographics() {
                         const tot = {};
                         PROJ_YEARS.forEach(y=>{ tot[y]=sortedProjection.reduce((s,r)=>s+r.years[y],0); });
                         const t25 = sortedProjection.reduce((s,r)=>{
-                          const cd=mergedCountries[r.name];
+                          const cd=COUNTRIES[r.name];
                           return s + selectedBandsValue(getDataForYear(cd.data,2025));
                         },0);
                         const annual = {};
@@ -3213,8 +3215,8 @@ export default function PopulationDemographics() {
                 .sort((a,b)=>{
                   if (profileSort === "alpha") return a.localeCompare(b);
                   // size: by total population at the selected year, largest first
-                  const ta = getDataForYear(mergedCountries[a].data, selectedYear)?.total || 0;
-                  const tb = getDataForYear(mergedCountries[b].data, selectedYear)?.total || 0;
+                  const ta = getDataForYear(COUNTRIES[a].data, selectedYear)?.total || 0;
+                  const tb = getDataForYear(COUNTRIES[b].data, selectedYear)?.total || 0;
                   return tb - ta;
                 })
                 .map(name=>(

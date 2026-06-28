@@ -2471,7 +2471,8 @@ export default function PopulationDemographics() {
 
   const AGE_CHIPS = [
     { id:"under18", label:"Under 18",  color:C.green,  bands:["under18"] },
-    { id:"18to49",  label:"18 – 49",   color:C.teal,   bands:["18to64"] },
+    { id:"18to49",  label:"18 – 49",   color:C.teal,   bands:["18to49"] },
+    { id:"50to64",  label:"50 – 64",   color:C.purple, bands:["50to64"] },
     { id:"over65",  label:"65+ (all)", color:C.amber,  bands:["65to79","over80"] },
     { id:"65to79",  label:"65 – 79",   color:C.gold2,  bands:["65to79"] },
     { id:"over80",  label:"80+",       color:C.red,    bands:["over80"] },

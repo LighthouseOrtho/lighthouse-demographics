@@ -2437,7 +2437,8 @@ export default function PopulationDemographics() {
     const r2030 = regionData?.find(d=>d.year===2030);
     const raw = [
       { label:"<18",   key:"under18", range:"0–17 yrs",  value:regionNow.under18, color:C.green },
-      { label:"18-64", key:"a18to64", range:"18–64 yrs", value:regionNow.a18to49||0, color:C.teal  },
+      { label:"18-49", key:"a18to49", range:"18–49 yrs", value:regionNow.a18to49||0, color:C.teal   },
+      { label:"50-64", key:"a50to64", range:"50–64 yrs", value:regionNow.a50to64||0, color:C.purple },
       { label:"65-79", key:"a65to79", range:"65–79 yrs", value:regionNow.a65to79, color:C.amber },
       { label:"80+",   key:"over80",  range:"80+ yrs",   value:regionNow.over80,  color:C.red   },
     ].filter(s => s.value > 0);

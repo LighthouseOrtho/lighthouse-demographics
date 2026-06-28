@@ -1165,11 +1165,12 @@ function TrendLine({ series, years, height=120, showLegend=true, showCagr=true, 
 // ── POPULATION PYRAMID (responsive, centered) ──────────────────────────────
 function PopPyramid({ dataRow, title, big=false }) {
   if (!dataRow) return null;
-  const { under18, a18to64, a65to79, over80 } = dataRow;
+  const { under18, a18to49, a50to64, a65to79, over80 } = dataRow;
   const groups = [
     { label:"80+",   total:over80,  mPct:0.38, fPct:0.62, color:C.red },
     { label:"65–79", total:a65to79, mPct:0.44, fPct:0.56, color:C.amber },
-    { label:"18–64", total:a18to64, mPct:0.49, fPct:0.51, color:C.teal },
+    { label:"18–49", total:a18to49, mPct:0.49, fPct:0.51, color:C.teal   },
+    { label:"50–64", total:a50to64, mPct:0.48, fPct:0.52, color:C.purple },
     { label:"<18",   total:under18, mPct:0.51, fPct:0.49, color:C.green },
   ];
   // Largest single half-bar value → scales every bar to a % of the available half-width
@@ -1234,7 +1235,8 @@ function AgeDistributionCurve({ series, title, height = 150 }) {
   // year is drawn as columns (one per band) and comparison years as lines.
   const BANDS = [
     { key:"under18", label:"<18",   color:C.green },
-    { key:"a18to64", label:"18–64", color:C.teal  },
+    { key:"a18to49", label:"18–49", color:C.teal   },
+    { key:"a50to64", label:"50–64", color:C.purple },
     { key:"a65to79", label:"65–79", color:C.amber },
     { key:"over80",  label:"80+",   color:C.red   },
   ];
@@ -1377,19 +1379,22 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
   }];
 
   const row2030 = getDataForYear(countryData.data, 2030);
-  const bandKey = { "<18":"under18", "18-64":"a18to64", "65-79":"a65to79", "80+":"over80" };
-  const bandRange = { "<18":"0–17 yrs", "18-64":"18–64 yrs", "65-79":"65–79 yrs", "80+":"80+ yrs" };
+  const bandKey = { "<18":"under18", "18-49":"a18to49", "50-64":"a50to64", "65-79":"a65to79", "80+":"over80" };
+  const modKey  = { "<18":"u18", "18-49":"w", "50-64":"p", "65-79":"s", "80+":"e" };
+  const bandRange = { "<18":"0–17 yrs", "18-49":"18–49 yrs", "50-64":"50–64 yrs", "65-79":"65–79 yrs", "80+":"80+ yrs" };
   const rawDonut = [
     { label:"<18",   value:u18_now,  color:C.green },
-    { label:"18-64", value:w_now,    color:C.teal  },
+    { label:"18-49", value:w_now,   color:C.teal   },
+    { label:"50-64", value:p_now,   color:C.purple },
     { label:"65-79", value:s_now,    color:C.amber },
     { label:"80+",   value:e_now,    color:C.red   },
   ].filter(s => s.value > 0);
   const donutTotal = rawDonut.reduce((a,b)=>a+b.value,0);
   const donutSegs = rawDonut.map(s => {
     const k = bandKey[s.label];
-    const v2025 = row2025[k] * (mod[k==="under18"?"u18":k==="a18to64"?"w":k==="a65to79"?"s":"e"]);
-    const v2030 = row2030[k] * (mod[k==="under18"?"u18":k==="a18to64"?"w":k==="a65to79"?"s":"e"]);
+    const mk = modKey[s.label];
+    const v2025 = (row2025[k]||0) * (mod[mk]||1);
+    const v2030 = (row2030[k]||0) * (mod[mk]||1);
     return {
       ...s,
       range: bandRange[s.label],
@@ -2303,7 +2308,8 @@ export default function PopulationDemographics() {
         const over65 = s + e;
         let selected = 0;
         if (ageGroups.includes("under18")) selected += u18;
-        if (ageGroups.includes("18to64"))  selected += w;
+        if (ageGroups.includes("18to49"))  selected += w;
+        if (ageGroups.includes("50to64"))  selected += p;
         if (ageGroups.includes("65to79"))  selected += s;
         if (ageGroups.includes("over80"))  selected += e;
         const prevTotal = rowPrev ? rowPrev.total : rowNow.total;
@@ -2316,7 +2322,7 @@ export default function PopulationDemographics() {
         const aging65Cagr = cagr(r2025.a65to79 + r2025.over80, r2035.a65to79 + r2035.over80, 10);
         return {
           name, flag:cd.flag, color:cd.color, region:cd.region,
-          total:rowNow.total, under18:u18, a18to64:w, a65to79:s, over80:e, over65,
+          total:rowNow.total, under18:u18, a18to49:w, a50to64:p, a65to79:s, over80:e, over65,
           selected, growth: parseFloat(growth), aging65growth: parseFloat(aging65growth),
           totalCagr, aging65Cagr,
           agingPct: ((rowNow.a65to79+rowNow.over80)/rowNow.total*100).toFixed(1),
@@ -2335,7 +2341,8 @@ export default function PopulationDemographics() {
     const mod = getAgeGroups(genderFilter);
     let v = 0;
     if (ageGroups.includes("under18")) v += row.under18 * mod.u18;
-    if (ageGroups.includes("18to64"))  v += row.a18to49||0 * mod.w;
+    if (ageGroups.includes("18to49"))  v += (row.a18to49||0) * mod.w;
+    if (ageGroups.includes("50to64"))  v += (row.a50to64||0) * mod.p;
     if (ageGroups.includes("65to79"))  v += row.a65to79 * mod.s;
     if (ageGroups.includes("over80"))  v += row.over80  * mod.e;
     return v;
@@ -2408,8 +2415,8 @@ export default function PopulationDemographics() {
   // ── GLOBAL TREND SERIES ────────────────────────────────────────────────────
   const trendSeries = useMemo(() => {
     if (activeCountries.length === 0) return [];
-    const BL = { under18:"<18", "18to64":"18–64", "65to79":"65–79", over80:"80+" };
-    const aLabel = ["under18","18to64","65to79","over80"].filter(b=>ageGroups.includes(b)).map(b=>BL[b]).join(" + ");
+    const BL = { under18:"<18", "18to49":"18–49", "50to64":"50–64", "65to79":"65–79", over80:"80+" };
+    const aLabel = ["under18","18to49","50to64","65to79","over80"].filter(b=>ageGroups.includes(b)).map(b=>BL[b]).join(" + ");
     return activeCountries.slice(0,6).map(name => {
       const cd = COUNTRIES[name];
       if (!cd) return null;
@@ -2423,7 +2430,8 @@ export default function PopulationDemographics() {
           if (!row) return 0;
           let v = 0;
           if (ageGroups.includes("under18")) v += row.under18 * mod.u18;
-          if (ageGroups.includes("18to64"))  v += row.a18to49||0 * mod.w;
+          if (ageGroups.includes("18to49"))  v += (row.a18to49||0) * mod.w;
+          if (ageGroups.includes("50to64"))  v += (row.a50to64||0) * mod.p;
           if (ageGroups.includes("65to79"))  v += row.a65to79 * mod.s;
           if (ageGroups.includes("over80"))  v += row.over80  * mod.e;
           return Math.round(v);
@@ -2486,7 +2494,8 @@ export default function PopulationDemographics() {
   // If both 65-79 and 80+ are on, also surface a combined 65+ column.
   const AGE_COL_DEFS = [
     { key:"under18", label:"<18",    color:C.green, band:"under18" },
-    { key:"a18to64", label:"18–64",  color:C.teal,  band:"18to64"  },
+    { key:"a18to49", label:"18–49",  color:C.teal,   band:"18to49"  },
+    { key:"a50to64", label:"50–64",  color:C.purple, band:"50to64"  },
     { key:"over65",  label:"65+",    color:C.amber, band:"__both65" },
     { key:"a65to79", label:"65–79",  color:C.gold2, band:"65to79"  },
     { key:"over80",  label:"80+",    color:C.red,   band:"over80"   },
@@ -2495,8 +2504,8 @@ export default function PopulationDemographics() {
     if (c.band === "__both65") return ageGroups.includes("65to79") && ageGroups.includes("over80");
     return ageGroups.includes(c.band);
   });
-  const BAND_LABELS = { under18:"<18", "18to64":"18–64", "65to79":"65–79", over80:"80+" };
-  const ageLabel = ["under18","18to64","65to79","over80"]
+  const BAND_LABELS = { under18:"<18", "18to49":"18–49", "50to64":"50–64", "65to79":"65–79", over80:"80+" };
+  const ageLabel = ["under18","18to49","50to64","65to79","over80"]
     .filter(b => ageGroups.includes(b)).map(b => BAND_LABELS[b]).join(" + ");
 
   const SortArrow = ({col}) => sortCol===col
@@ -2683,7 +2692,7 @@ export default function PopulationDemographics() {
                       <div>
                         <Donut interactive year={selectedYear} segments={regionDonut} size={240} centerLabel={agingPct+"%"} centerSub="aged 65+"/>
                         <div style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:12}}>
-                          {[{l:"<18",c:C.green},{l:"18-64",c:C.teal},{l:"65-79",c:C.amber},{l:"80+",c:C.red}].map(({l,c})=>(
+                          {[{l:"<18",c:C.green},{l:"18-49",c:C.teal},{l:"50-64",c:C.purple},{l:"65-79",c:C.amber},{l:"80+",c:C.red}].map(({l,c})=>(
                             <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
                               <div style={{width:11,height:11,borderRadius:3,background:c}}/>
                               <span style={{fontFamily:"system-ui",fontSize:15,color:C.sub}}>{l}</span>

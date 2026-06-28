@@ -2853,6 +2853,3 @@ export default function PopulationDemographics() {
     </div>
   );
 }
-
-  );
-}

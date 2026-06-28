@@ -741,7 +741,7 @@ function computeProfile(dataRows, ageGroups, genderFilter, year) {
   if (!row) return null;
   const mod = getAgeGroups(genderFilter);
   const u18  = Math.round(row.under18  * mod.u18);
-  const w    = Math.round(row.a18to64  * mod.w);
+  const w    = Math.round(row.a18to49 * mod.w);
   const s    = Math.round(row.a65to79  * mod.s);
   const e    = Math.round(row.over80   * mod.e);
   const over65 = s + e;
@@ -1346,7 +1346,7 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
 
   const mod = getAgeGroups(genderFilter);
   const u18_now  = Math.round(rowNow.under18 * mod.u18);
-  const w_now    = Math.round(rowNow.a18to64 * mod.w);
+  const w_now    = Math.round(rowNow.a18to49||0 * mod.w);
   const s_now    = Math.round(rowNow.a65to79 * mod.s);
   const e_now    = Math.round(rowNow.over80  * mod.e);
   const over65_now = s_now + e_now;
@@ -2275,7 +2275,7 @@ export default function PopulationDemographics() {
         if (!rowNow) return null;
         const mod = getAgeGroups(genderFilter);
         const u18    = Math.round(rowNow.under18 * mod.u18);
-        const w      = Math.round(rowNow.a18to64 * mod.w);
+        const w      = Math.round(rowNow.a18to49||0 * mod.w);
         const s      = Math.round(rowNow.a65to79 * mod.s);
         const e      = Math.round(rowNow.over80  * mod.e);
         const over65 = s + e;
@@ -2313,7 +2313,7 @@ export default function PopulationDemographics() {
     const mod = getAgeGroups(genderFilter);
     let v = 0;
     if (ageGroups.includes("under18")) v += row.under18 * mod.u18;
-    if (ageGroups.includes("18to64"))  v += row.a18to64 * mod.w;
+    if (ageGroups.includes("18to64"))  v += row.a18to49||0 * mod.w;
     if (ageGroups.includes("65to79"))  v += row.a65to79 * mod.s;
     if (ageGroups.includes("over80"))  v += row.over80  * mod.e;
     return v;
@@ -2372,7 +2372,8 @@ export default function PopulationDemographics() {
       year: d.y,
       total: d.total,
       under18: d.under18,
-      a18to64: d.a18to64,
+      a18to49: d.a18to49||0,
+      a50to64: d.a50to64||0,
       a65to79: d.a65to79,
       over65: d.a65to79 + d.over80,
       over80: d.over80,
@@ -2400,7 +2401,7 @@ export default function PopulationDemographics() {
           if (!row) return 0;
           let v = 0;
           if (ageGroups.includes("under18")) v += row.under18 * mod.u18;
-          if (ageGroups.includes("18to64"))  v += row.a18to64 * mod.w;
+          if (ageGroups.includes("18to64"))  v += row.a18to49||0 * mod.w;
           if (ageGroups.includes("65to79"))  v += row.a65to79 * mod.s;
           if (ageGroups.includes("over80"))  v += row.over80  * mod.e;
           return Math.round(v);
@@ -2416,7 +2417,7 @@ export default function PopulationDemographics() {
     const r2030 = regionData?.find(d=>d.year===2030);
     const raw = [
       { label:"<18",   key:"under18", range:"0–17 yrs",  value:regionNow.under18, color:C.green },
-      { label:"18-64", key:"a18to64", range:"18–64 yrs", value:regionNow.a18to64, color:C.teal  },
+      { label:"18-64", key:"a18to64", range:"18–64 yrs", value:regionNow.a18to49||0, color:C.teal  },
       { label:"65-79", key:"a65to79", range:"65–79 yrs", value:regionNow.a65to79, color:C.amber },
       { label:"80+",   key:"over80",  range:"80+ yrs",   value:regionNow.over80,  color:C.red   },
     ].filter(s => s.value > 0);
@@ -2638,7 +2639,8 @@ export default function PopulationDemographics() {
                 {[
                   {label:"TOTAL",   value:fmt(regionNow.total), color:REGIONS[region]?.color||C.teal},
                   {label:"< 18",    value:fmt(regionNow.under18), color:C.green},
-                  {label:"18–64",   value:fmt(regionNow.a18to64), color:C.teal},
+                  {label:"18–49",   value:fmt(regionNow.a18to49||0), color:C.teal},
+                  {label:"50–64",   value:fmt(regionNow.a50to64||0), color:C.purple},
                   {label:"65–79",   value:fmt(regionNow.over65 - regionNow.over80), color:C.amber},
                   {label:"80+",     value:fmt(regionNow.over80), color:C.red},
                 ].map(({label,value,color})=>(
@@ -2691,7 +2693,7 @@ export default function PopulationDemographics() {
                     {label:"65+ Population", value:fmt(regionNow.over65), color:C.amber},
                     {label:"80+ Population", value:fmt(regionNow.over80), color:C.red},
                     {label:"Ageing Index",   value:agingPct+"%", color:parseFloat(agingPct)>20?C.red:C.amber},
-                    {label:"Working Age",    value:((regionNow.a18to64/regionNow.total)*100).toFixed(1)+"%", color:C.teal},
+                    {label:"Working Age",    value:((((regionNow.a18to49||0)+(regionNow.a50to64||0))/regionNow.total)*100).toFixed(1)+"%", color:C.teal},
                   ].map(({label,value,color})=>(
                     <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
                       <span style={{fontFamily:"system-ui",fontSize:13,color:"rgba(255,255,255,0.88)"}}>{label}</span>

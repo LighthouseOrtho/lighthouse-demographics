@@ -2203,6 +2203,7 @@ export default function PopulationDemographics() {
 
   const [liveVer, setLiveVer] = useState(0);
   useEffect(() => {
+    if (!liveData || !liveData.countries) return;
     liveData.countries.forEach(rec => {
       const match = Object.keys(COUNTRIES).find(k => k === rec.name);
       const data = Object.keys(rec.byYear).map(Number).sort((a,b)=>a-b).map(yr => {
@@ -2211,7 +2212,7 @@ export default function PopulationDemographics() {
           a18to49:d.age18_49||0, a50to64:d.age50_64||0,
           a65to79:d.age65_79||0, over80:d.age80plus||0 };
       });
-      COUNTRIES[match].data = data;
+      if (match) COUNTRIES[match].data = data;
     });
     setLiveVer(v => v + 1);
   }, [liveData]);

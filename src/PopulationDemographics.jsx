@@ -2220,7 +2220,7 @@ export default function PopulationDemographics() {
  // explorer | profiles
   const [region, setRegion]       = useState("Global");
   const [genderFilter, setGender] = useState("All");
-  const [ageGroups, setAgeGroups] = useState(["under18","18to64","65to79","over80"]);
+  const [ageGroups, setAgeGroups] = useState(["under18","18to49","50to64","65to79","over80"]);
   const [selectedYear, setYear]   = useState(2025);
   const [selectedCountries, setSelectedCountries] = useState(["United Kingdom","Germany","Japan","United States"]);
   const [favCountries, setFavCountries] = useState([]);

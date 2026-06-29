@@ -1792,25 +1792,35 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
   const gid="rg-"+region.replace(/[^a-z0-9]/gi,"-");
   return (
     <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(11,31,58,0.12)",border:"1px solid "+C.border,scrollSnapAlign:"start",flexShrink:0,width:"calc(100vw - 24px)",maxWidth:390}}>
-      <div style={{background:"linear-gradient(135deg,"+C.navy+" 0%,#1A3A5C 100%)",padding:"12px 16px 10px",borderBottom:"3px solid "+color}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+      {/* Colour top strip */}
+      <div style={{height:6,background:color}}/>
+      {/* Card header - light background, high contrast */}
+      <div style={{background:"#F8F5EE",padding:"14px 16px 12px"}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:12}}>
+          {/* Left: flag + region */}
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:22}}>{flag}</span>
+            <span style={{fontSize:24}}>{flag}</span>
             <div>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:"#fff",lineHeight:1}}>{region.toUpperCase()}</div>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color:"rgba(255,255,255,0.9)",marginTop:2}}>POPULATION ANALYTICS · {selectedYear} · {sex.toUpperCase()}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:20,letterSpacing:2,color:C.navy,lineHeight:1}}>{region.toUpperCase()}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color:color,marginTop:2}}>{selectedYear > 2025 ? "PROJECTED · " : ""}{selectedYear}</div>
             </div>
           </div>
+          {/* Right: dynamic total */}
           <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#fff",lineHeight:1}}>{fmt(total)}</div>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:"rgba(255,255,255,0.9)"}}>TOTAL POPULATION · {selectedYear}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,color:C.navy,lineHeight:1,letterSpacing:1}}>{fmt(total)}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1,color:C.sub,marginTop:2}}>{sex.toUpperCase() === "ALL" ? "TOTAL" : sex.toUpperCase()} POPULATION</div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-          {[{l:"65+ SHARE",v:a65pct+"%",c:parseFloat(a65pct)>18?C.red:C.amber},{l:"80+ POP",v:fmt(bands[4].v),c:"rgba(255,255,255,0.9)"},{l:"CAGR →30",v:totCagr!=null?(totCagr>0?"+":"")+totCagr.toFixed(2)+"%":"—",c:totCagr!=null&&totCagr>0?C.green:"#FF8A8A"}].map(m=>(
-            <div key={m.l} style={{textAlign:"center",background:"rgba(255,255,255,0.08)",borderRadius:8,padding:"6px 4px"}}>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:"rgba(255,255,255,0.85)",marginBottom:2}}>{m.l}</div>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color:m.c,letterSpacing:0.3,lineHeight:1}}>{m.v}</div>
+        {/* Key metrics */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+          {[
+            {l:"65+ SHARE", v:a65pct+"%",  c:parseFloat(a65pct)>18?C.red:C.amber, bg:parseFloat(a65pct)>18?"#FEF2F2":"#FFFBEB"},
+            {l:"80+ POP",   v:fmt(bands[4].v), c:C.navy, bg:"#F0F4FF"},
+            {l:"CAGR →30", v:totCagr!=null?(totCagr>0?"+":"")+totCagr.toFixed(2)+"%":"—", c:totCagr!=null&&totCagr>0?C.green:C.red, bg:totCagr!=null&&totCagr>0?"#F0FDF4":"#FEF2F2"},
+          ].map(m=>(
+            <div key={m.l} style={{textAlign:"center",background:m.bg,borderRadius:10,padding:"8px 4px",border:"1px solid "+C.border}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.sub,marginBottom:3}}>{m.l}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,color:m.c,letterSpacing:0.3,lineHeight:1}}>{m.v}</div>
             </div>
           ))}
         </div>

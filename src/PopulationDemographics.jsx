@@ -1759,7 +1759,101 @@ function StateProfileCard({ name, isSelected, onSelect, defaultOpen, cardId, onZ
 }
 
 
-function RegionCard({ region, regionData, selectedYear, onZoom }) {
+
+function GlobalCard({ allRegionsData, selectedYear, onScrollTo, onBandClick, expandedBand }) {
+  const [expanded, setExpanded] = useState(false);
+  const row = useMemo(() => Object.values(allRegionsData).reduce((acc,rData) => {
+    const r=rData.find(d=>d.year===selectedYear)||rData[rData.length-1]; if(!r) return acc;
+    return {year:selectedYear,total:acc.total+(r.total||0),under18:acc.under18+(r.under18||0),a18to49:acc.a18to49+(r.a18to49||0),a50to64:acc.a50to64+(r.a50to64||0),a65to79:acc.a65to79+(r.a65to79||0),over80:acc.over80+(r.over80||0)};
+  },{year:selectedYear,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0}),[allRegionsData,selectedYear]);
+  const row30 = useMemo(() => Object.values(allRegionsData).reduce((acc,rData) => {
+    const r=rData.find(d=>d.year===2030); if(!r) return acc;
+    return {total:(acc.total||0)+(r.total||0),a65to79:(acc.a65to79||0)+(r.a65to79||0),over80:(acc.over80||0)+(r.over80||0)};
+  },{total:0,a65to79:0,over80:0}),[allRegionsData]);
+  if(!row||!row.total) return null;
+  const color="#CC2229";
+  const aged65=row.a65to79+row.over80;
+  const a65pct=(aged65/row.total*100).toFixed(1);
+  const totCagr=row30.total?((Math.pow(row30.total/row.total,0.2)-1)*100):null;
+  const bands=[
+    {key:"under18",label:"<18",  col:C.green, v:row.under18, v30:row30.under18},
+    {key:"a18to49",label:"18-49",col:C.teal,  v:row.a18to49, v30:row30.a18to49},
+    {key:"a50to64",label:"50-64",col:C.purple,v:row.a50to64, v30:row30.a50to64},
+    {key:"a65to79",label:"65-79",col:C.amber, v:row.a65to79, v30:row30.a65to79},
+    {key:"over80", label:"80+",  col:C.red,   v:row.over80,  v30:row30.over80},
+  ];
+  return (
+    <div id="card-Global" style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(11,31,58,0.12)",border:"1px solid "+C.border,scrollSnapAlign:"start",flexShrink:0,width:"calc(100vw - 24px)",maxWidth:390}}>
+      <div style={{height:6,background:color}}/>
+      <div style={{background:"#F8F5EE",padding:"14px 16px 12px"}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:24}}>&#x1F30D;</span>
+            <div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:20,letterSpacing:2,color:C.navy,lineHeight:1}}>GLOBAL</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:1.5,color,marginTop:2}}>{selectedYear}</div>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"flex-start",gap:8}}>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,color:C.navy,lineHeight:1}}>{fmt(row.total)}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,color:C.sub,marginTop:2}}>TOTAL POPULATION</div>
+            </div>
+            <button onClick={()=>setExpanded(v=>!v)} style={{border:"1px solid "+C.border,background:expanded?C.navy:"#fff",borderRadius:8,width:28,height:28,cursor:"pointer",color:expanded?"#fff":C.sub,fontSize:14,padding:0,display:"flex",alignItems:"center",justifyContent:"center"}}>{expanded?"x":"+"}</button>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+          {[{l:"65+ SHARE",v:a65pct+"%",c:parseFloat(a65pct)>18?C.red:C.amber,bg:"#FFFBEB"},{l:"80+ POP",v:fmt(row.over80),c:C.navy,bg:"#F0F4FF"},{l:"CAGR 25-30",v:totCagr!=null?(totCagr>0?"+":"")+totCagr.toFixed(2)+"%":"--",c:totCagr!=null&&totCagr>0?C.green:C.red,bg:"#F0FDF4"}].map(m=>(
+            <div key={m.l} style={{textAlign:"center",background:m.bg,borderRadius:10,padding:"8px 4px",border:"1px solid "+C.border}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.sub,marginBottom:3}}>{m.l}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,color:m.c,lineHeight:1}}>{m.v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {expanded&&(
+        <div style={{padding:"12px 14px",borderTop:"1px solid "+C.border,background:"#F8FAFC"}}>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.sub,marginBottom:10}}>SELECT A REGION</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <GlobalCard allRegionsData={Object.fromEntries(Object.entries(REGIONS).map(([r,rd])=>[r,YEARS.map(y=>(rd.countries||[]).reduce((acc,name)=>{const cd=COUNTRIES[name];if(!cd)return acc;const row=getDataForYear(cd.data,y);if(!row)return acc;return {year:y,total:acc.total+(row.total||0),under18:acc.under18+(row.under18||0),a18to49:acc.a18to49+(row.a18to49||0),a50to64:acc.a50to64+(row.a50to64||0),a65to79:acc.a65to79+(row.a65to79||0),over80:acc.over80+(row.over80||0)};},{year:y,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0})).filter(d=>d.total>0)]))} selectedYear={selectedYear} onScrollTo={scrollToRegion} onBandClick={setExpandedBand} expandedBand={expandedBand}/>
+          {Object.entries(REGIONS).map(([r,rd])=>{
+              const rRow=(allRegionsData[r]||[]).find(d=>d.year===selectedYear);
+              const pct=rRow&&rRow.total?(((rRow.a65to79+rRow.over80)/rRow.total)*100).toFixed(1):"--";
+              return <button key={r} onClick={()=>{setExpanded(false);onScrollTo(r);}} style={{display:"flex",alignItems:"center",gap:8,background:"#fff",border:"1px solid "+C.border,borderLeft:"3px solid "+(rd.color||C.teal),borderRadius:10,padding:"10px 12px",cursor:"pointer",textAlign:"left"}}>
+                <span style={{fontSize:18}}>{rd.flag||"?"}</span>
+                <div><div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,color:C.navy,lineHeight:1}}>{r}</div><div style={{fontFamily:"system-ui",fontSize:10,color:C.sub,marginTop:2}}>{pct}% aged 65+</div></div>
+              </button>;
+            })}
+          </div>
+        </div>
+      )}
+      <div style={{padding:"8px 14px 0",borderTop:"1px solid "+C.border}}>
+        <div style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,paddingBottom:5,borderBottom:"1px solid "+C.border}}>
+          {["BAND","POPULATION","SHARE","CAGR"].map(h=>(<div key={h} style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.sub,textAlign:h==="BAND"?"left":"right"}}>{h}</div>))}
+        </div>
+        {bands.map(b=>{
+          const share=(b.v/row.total*100).toFixed(1);
+          const gr=(b.v&&b.v30)?((Math.pow(b.v30/b.v,0.2)-1)*100):null;
+          const isExp=expandedBand===b.key;
+          return <div key={b.key} onClick={()=>onBandClick&&onBandClick(isExp?null:b.key)} style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,padding:"5px 4px",borderBottom:"1px solid rgba(200,214,229,0.3)",cursor:"pointer",background:isExp?b.col+"22":"transparent",borderRadius:4}}>
+            <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:7,height:7,borderRadius:2,background:b.col}}/><span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy}}>{b.label}</span></div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy,textAlign:"right"}}>{fmt(b.v)}</div>
+            <div style={{fontFamily:"system-ui",fontSize:11,color:C.sub,textAlign:"right"}}>{share}%</div>
+            <div style={{textAlign:"right"}}>{gr!=null&&<span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:gr>0?C.green:"#FF8A8A"}}>{gr>0?"+":""}{gr.toFixed(2)}%</span>}</div>
+          </div>;
+        })}
+        <div style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,padding:"6px 0 8px",borderTop:"1.5px solid "+C.border}}>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy}}>TOTAL</div>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy,textAlign:"right"}}>{fmt(row.total)}</div>
+          <div style={{fontFamily:"system-ui",fontSize:11,color:C.sub,textAlign:"right"}}>100%</div>
+          <div style={{textAlign:"right"}}>{totCagr!=null&&<span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:totCagr>0?C.green:"#FF8A8A"}}>{totCagr>0?"+":""}{totCagr.toFixed(2)}%</span>}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegionCard({ region, regionData, selectedYear, onZoom, cardId, onBandClick, expandedBand }) {
   const [sex, setSex] = useState("All");
   const row   = regionData ? regionData.find(d => d.year === selectedYear) || regionData[regionData.length-1] : null;
   const row30 = regionData ? regionData.find(d => d.year === 2030) : null;
@@ -1791,7 +1885,7 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
   const aPts=[tx(0).toFixed(1)+","+(H-pB),...td.map((d,i)=>tx(i).toFixed(1)+","+ty(d.total||0).toFixed(1)),tx(td.length-1).toFixed(1)+","+(H-pB)].join(" ");
   const gid="rg-"+region.replace(/[^a-z0-9]/gi,"-");
   return (
-    <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(11,31,58,0.12)",border:"1px solid "+C.border,scrollSnapAlign:"start",flexShrink:0,width:"calc(100vw - 24px)",maxWidth:390}}>
+    <div id={cardId} style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(11,31,58,0.12)",border:"1px solid "+C.border,scrollSnapAlign:"start",flexShrink:0,width:"calc(100vw - 24px)",maxWidth:390}}>
       {/* Colour top strip */}
       <div style={{height:6,background:color}}/>
       {/* Card header - light background, high contrast */}
@@ -2764,7 +2858,7 @@ export default function PopulationDemographics() {
 
 
         {/* ── SWIPEABLE REGION CARDS ── */}
-        <div style={{display:'flex',gap:12,overflowX:'auto',scrollSnapType:'x mandatory',WebkitOverflowScrolling:'touch',paddingBottom:8,msOverflowStyle:'none',scrollbarWidth:'none'}}>
+        <div ref={cardsRef} style={{display:'flex',gap:12,overflowX:'auto',scrollSnapType:'x mandatory',WebkitOverflowScrolling:'touch',paddingBottom:8,msOverflowStyle:'none',scrollbarWidth:'none'}}>
           {Object.entries(REGIONS).map(([r,rd])=>{
             const rData = YEARS.map(y=>{
               const countryList = rd.countries||[];
@@ -2773,7 +2867,7 @@ export default function PopulationDemographics() {
                 return {year:y,total:acc.total+(row.total||0),under18:acc.under18+(row.under18||0),a18to49:acc.a18to49+(row.a18to49||0),a50to64:acc.a50to64+(row.a50to64||0),a65to79:acc.a65to79+(row.a65to79||0),over80:acc.over80+(row.over80||0)};
               },{year:y,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0});
             }).filter(d=>d.total>0);
-            return <RegionCard key={r} region={r} regionData={rData} selectedYear={selectedYear} onZoom={openZoom}/>;
+            return <RegionCard key={r} region={r} regionData={rData} selectedYear={selectedYear} onZoom={openZoom} cardId={"card-"+r.replace(/[^a-zA-Z0-9]/g,"-")} onBandClick={setExpandedBand} expandedBand={expandedBand}/>;
           })}
         </div>
         {/* ── REGION SUMMARY BANNER ── */}

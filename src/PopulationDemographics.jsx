@@ -1815,7 +1815,6 @@ function GlobalCard({ allRegionsData, selectedYear, onScrollTo, onBandClick, exp
         <div style={{padding:"12px 14px",borderTop:"1px solid "+C.border,background:"#F8FAFC"}}>
           <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,letterSpacing:2,color:C.sub,marginBottom:10}}>SELECT A REGION</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            <GlobalCard allRegionsData={Object.fromEntries(Object.entries(REGIONS).map(([r,rd])=>[r,YEARS.map(y=>(rd.countries||[]).reduce((acc,name)=>{const cd=COUNTRIES[name];if(!cd)return acc;const row=getDataForYear(cd.data,y);if(!row)return acc;return {year:y,total:acc.total+(row.total||0),under18:acc.under18+(row.under18||0),a18to49:acc.a18to49+(row.a18to49||0),a50to64:acc.a50to64+(row.a50to64||0),a65to79:acc.a65to79+(row.a65to79||0),over80:acc.over80+(row.over80||0)};},{year:y,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0})).filter(d=>d.total>0)]))} selectedYear={selectedYear} onScrollTo={scrollToRegion} onBandClick={setExpandedBand} expandedBand={expandedBand}/>
           {Object.entries(REGIONS).map(([r,rd])=>{
               const rRow=(allRegionsData[r]||[]).find(d=>d.year===selectedYear);
               const pct=rRow&&rRow.total?(((rRow.a65to79+rRow.over80)/rRow.total)*100).toFixed(1):"--";

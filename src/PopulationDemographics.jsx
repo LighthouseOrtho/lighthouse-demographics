@@ -1776,7 +1776,7 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
     {key:"a65to79",label:"65-79",col:C.amber, v:Math.round((row.a65to79||0)*mod.s),  v30:row30?Math.round((row30.a65to79||0)*mod.s):null},
     {key:"over80", label:"80+",  col:C.red,   v:Math.round((row.over80||0)*mod.e),   v30:row30?Math.round((row30.over80||0)*mod.e):null},
   ];
-  const total  = bands.reduce((s,b)=>s+b.v,0)||row.total||1;
+  const total  = sex==="All" ? (row.total||1) : (bands.reduce((s,b)=>s+b.v,0)||row.total||1);
   const a65    = bands[3].v+bands[4].v;
   const a65pct = (a65/total*100).toFixed(1);
   const totCagr= (row.total&&row30&&row30.total)?((Math.pow(row30.total/row.total,0.2)-1)*100):null;
@@ -1798,7 +1798,7 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
             <span style={{fontSize:22}}>{flag}</span>
             <div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:"#fff",lineHeight:1}}>{region.toUpperCase()}</div>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color,marginTop:2}}>POPULATION ANALYTICS · {selectedYear} · {sex.toUpperCase()}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color:"rgba(255,255,255,0.9)",marginTop:2}}>POPULATION ANALYTICS · {selectedYear} · {sex.toUpperCase()}</div>
             </div>
           </div>
           <div style={{textAlign:"right"}}>

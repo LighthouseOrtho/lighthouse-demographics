@@ -49,7 +49,7 @@ const YEARS = [2005,2010,2015,2020,2025,2030,2035];
 
 const REGIONS = {
   "Global": {
-    color:"#0B1F3A", flag:"🌍",
+    color:"#CC2229", flag:"🌍",
     data:[
       {y:2005,total:6542000,under18:1980000,a18to49:2898000,a50to64:1242000,a65to79:345000,over80:77000},
       {y:2010,total:6957000,under18:2010000,a18to49:3122000,a50to64:1338000,a65to79:392000,over80:95000},
@@ -62,7 +62,7 @@ const REGIONS = {
     countries:["United Kingdom","Germany","France","United States","Japan","China","India","Brazil","Nigeria","South Africa","Australia","Canada"],
   },
   "Europe": {
-    color:"#1A5BBD", flag:"🇪🇺",
+    color:"#1B54A8", flag:"🇪🇺",
     data:[
       {y:2005,total:728000,under18:141000,a18to49:338800,a50to64:145200,a65to79:84000,over80:19000},
       {y:2010,total:736000,under18:137000,a18to49:342300,a50to64:146700,a65to79:89000,over80:21000},
@@ -75,7 +75,7 @@ const REGIONS = {
     countries:["United Kingdom","Germany","France","Italy","Spain","Netherlands","Poland","Sweden","Norway","Denmark","Switzerland","Belgium","Portugal","Austria","Ireland","Finland"],
   },
   "Americas": {
-    color:"#E05252", flag:"🌎",
+    color:"#D4870A", flag:"🌎",
     data:[
       {y:2005,total:882000,under18:268000,a18to49:391300,a50to64:167700,a65to79:46000,over80:9000},
       {y:2010,total:938000,under18:272000,a18to49:421400,a50to64:180600,a65to79:53000,over80:11000},
@@ -88,7 +88,7 @@ const REGIONS = {
     countries:["United States","Canada","Brazil","Mexico","Colombia","Argentina","Chile","Peru"],
   },
   "Asia-Pacific": {
-    color:"#00C4B4", flag:"🌏",
+    color:"#007A5E", flag:"🌏",
     data:[
       {y:2005,total:3938000,under18:1272000,a18to49:1729000,a50to64:741000,a65to79:168000,over80:28000},
       {y:2010,total:4164000,under18:1280000,a18to49:1862000,a50to64:798000,a65to79:196000,over80:28000},
@@ -101,7 +101,7 @@ const REGIONS = {
     countries:["Japan","China","India","Australia","South Korea","Indonesia","Philippines","Vietnam","Thailand","Malaysia","Singapore","New Zealand","Pakistan","Bangladesh"],
   },
   "Africa": {
-    color:"#F5A623", flag:"🌍",
+    color:"#9B1D8A", flag:"🌍",
     data:[
       {y:2005,total:913000,under18:440000,a18to49:318500,a50to64:136500,a65to79:16000,over80:2000},
       {y:2010,total:1045000,under18:497000,a18to49:368900,a50to64:158100,a65to79:19000,over80:2000},
@@ -114,7 +114,7 @@ const REGIONS = {
     countries:["Nigeria","South Africa","Ethiopia","Egypt","Kenya","Ghana","Tanzania","Morocco","Mozambique","Uganda"],
   },
   "Middle East": {
-    color:"#7C3AED", flag:"🕌",
+    color:"#B8860B", flag:"🕌",
     data:[
       {y:2005,total:193000,under18:68000,a18to49:81200,a50to64:34800,a65to79:7400,over80:1600},
       {y:2010,total:222000,under18:73000,a18to49:97300,a50to64:41700,a65to79:8500,over80:1500},

@@ -1799,7 +1799,7 @@ function GlobalCard({ allRegionsData, selectedYear, onScrollTo, onBandClick, exp
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,color:C.navy,lineHeight:1}}>{fmt(row.total)}</div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:10,color:C.sub,marginTop:2}}>TOTAL POPULATION</div>
             </div>
-            <button onClick={()=>setExpanded(v=>!v)} style={{border:"1px solid "+C.border,background:expanded?C.navy:"#fff",borderRadius:8,width:28,height:28,cursor:"pointer",color:expanded?"#fff":C.sub,fontSize:14,padding:0,display:"flex",alignItems:"center",justifyContent:"center"}}>{expanded?"x":"+"}</button>
+            <button onClick={()=>setExpanded(v=>!v)} style={{border:"1px solid "+C.border,background:expanded?C.navy:"#fff",borderRadius:8,width:32,height:32,cursor:"pointer",color:"#fff",fontSize:16,fontWeight:"bold",padding:0,display:"flex",alignItems:"center",justifyContent:"center",background:expanded?C.navy:"#CC2229",border:"none"}}>{expanded?"x":"+"}</button>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>

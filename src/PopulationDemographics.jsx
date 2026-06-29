@@ -2756,7 +2756,13 @@ export default function PopulationDemographics() {
         {/* ── SWIPEABLE REGION CARDS ── */}
         <div style={{display:'flex',gap:12,overflowX:'auto',scrollSnapType:'x mandatory',WebkitOverflowScrolling:'touch',paddingBottom:8,msOverflowStyle:'none',scrollbarWidth:'none'}}>
           {Object.entries(REGIONS).map(([r,rd])=>{
-            const rData = (rd.data||[]).map(d=>({...d,year:d.year||d.y})).filter(d=>d.year);
+            const rData = YEARS.map(y=>{
+              const countryList = rd.countries||[];
+              return countryList.reduce((acc,name)=>{
+                const cd=COUNTRIES[name]; if(cd ~/Documents/lighthouse-demographics) return acc;
+                return {year:y,total:acc.total+(row.total||0),under18:acc.under18+(row.under18||0),a18to49:acc.a18to49+(row.a18to49||0),a50to64:acc.a50to64+(row.a50to64||0),a65to79:acc.a65to79+(row.a65to79||0),over80:acc.over80+(row.over80||0)};
+              },{year:y,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0});
+            }).filter(d=>d.total>0);
             return <RegionCard key={r} region={r} regionData={rData} selectedYear={selectedYear} onZoom={openZoom}/>;
           })}
         </div>

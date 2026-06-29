@@ -2303,7 +2303,8 @@ export default function PopulationDemographics() {
         if (!rowNow) return null;
         const mod = getAgeGroups(genderFilter);
         const u18    = Math.round(rowNow.under18 * mod.u18);
-        const w      = Math.round(rowNow.a18to49||0 * mod.w);
+        const w      = Math.round((rowNow.a18to49||0) * mod.w);
+        const p      = Math.round((rowNow.a50to64||0) * mod.p);
         const s      = Math.round(rowNow.a65to79 * mod.s);
         const e      = Math.round(rowNow.over80  * mod.e);
         const over65 = s + e;

@@ -1803,13 +1803,13 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#fff",lineHeight:1}}>{fmt(row.total)}</div>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:"rgba(255,255,255,0.85)"}}>{selectedYear} · TOTAL POPULATION</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:"rgba(255,255,255,0.55)"}}>TOTAL POPULATION</div>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
           {[{l:"65+ SHARE",v:a65pct+"%",c:parseFloat(a65pct)>18?C.red:C.amber},{l:"80+ POP",v:fmt(bands[4].v),c:"rgba(255,255,255,0.9)"},{l:"CAGR →30",v:totCagr!=null?(totCagr>0?"+":"")+totCagr.toFixed(2)+"%":"—",c:totCagr!=null&&totCagr>0?C.green:"#FF8A8A"}].map(m=>(
             <div key={m.l} style={{textAlign:"center",background:"rgba(255,255,255,0.08)",borderRadius:8,padding:"6px 4px"}}>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:"rgba(255,255,255,0.85)",marginBottom:2}}>{m.l}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:"rgba(255,255,255,0.55)",marginBottom:2}}>{m.l}</div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color:m.c,letterSpacing:0.3,lineHeight:1}}>{m.v}</div>
             </div>
           ))}
@@ -2649,7 +2649,7 @@ export default function PopulationDemographics() {
               padding:"10px 0 8px", display:"flex", alignItems:"center", justifyContent:"center", gap:6,
               borderBottom: activeTab===t.id ? `3px solid ${C.teal}` : "3px solid transparent",
               fontFamily:"'Bebas Neue',sans-serif", fontSize:14, letterSpacing:1.5,
-              color: activeTab===t.id ? C.teal : "rgba(255,255,255,0.85)",
+              color: activeTab===t.id ? C.teal : "rgba(255,255,255,0.5)",
               transition:"color 0.15s",
             }}>
               <span style={{fontSize:13}}>{t.icon}</span>{t.label}
@@ -2759,7 +2759,7 @@ export default function PopulationDemographics() {
             const rData = YEARS.map(y=>{
               const countryList = rd.countries||[];
               return countryList.reduce((acc,name)=>{
-                const cd=COUNTRIES[name]; if(cd ~/Documents/lighthouse-demographics) return acc;
+                const cd=COUNTRIES[name]; if(!cd) return acc; const row=getDataForYear(cd.data,y); if(!row) return acc;
                 return {year:y,total:acc.total+(row.total||0),under18:acc.under18+(row.under18||0),a18to49:acc.a18to49+(row.a18to49||0),a50to64:acc.a50to64+(row.a50to64||0),a65to79:acc.a65to79+(row.a65to79||0),over80:acc.over80+(row.over80||0)};
               },{year:y,total:0,under18:0,a18to49:0,a50to64:0,a65to79:0,over80:0});
             }).filter(d=>d.total>0);

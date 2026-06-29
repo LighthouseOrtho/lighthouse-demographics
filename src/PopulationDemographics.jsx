@@ -2417,7 +2417,7 @@ export default function PopulationDemographics() {
   const { data: liveData, loading: liveLoading } = useDemographicsData();
   const [expandedBand, setExpandedBand] = useState(null);
   const cardsRef = useRef(null);
-  const scrollToRegion = (r) => { const id = r.replace(/[^a-zA-Z0-9]/g,"-"); const el = document.getElementById("card-"+id); if(el) el.scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}); };
+  const scrollToRegion = (r) => { setTimeout(()=>{ const id = r.replace(/[^a-zA-Z0-9]/g,"-"); const el = document.getElementById("card-"+id); if(el) el.scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}); },100); };
 
   const [liveVer, setLiveVer] = useState(0);
   useEffect(() => {

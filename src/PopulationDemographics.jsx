@@ -1758,6 +1758,109 @@ function StateProfileCard({ name, isSelected, onSelect, defaultOpen, cardId, onZ
   );
 }
 
+
+function RegionCard({ region, regionData, selectedYear, onZoom }) {
+  const [sex, setSex] = useState("All");
+  const row   = regionData ? regionData.find(d => d.year === selectedYear) || regionData[regionData.length-1] : null;
+  const row30 = regionData ? regionData.find(d => d.year === 2030) : null;
+  const rd    = REGIONS[region] || {};
+  const color = rd.color || C.teal;
+  const flag  = rd.flag || "🌍";
+  const mod = sex==="Male" ? {u18:0.51,w:0.49,p:0.48,s:0.44,e:0.38}
+            : sex==="Female" ? {u18:0.49,w:0.51,p:0.52,s:0.56,e:0.62}
+            : {u18:1,w:1,p:1,s:1,e:1};
+  const bands = [
+    {key:"under18",label:"<18",  col:C.green, v:Math.round((row.under18||0)*mod.u18), v30:row30?Math.round((row30.under18||0)*mod.u18):null},
+    {key:"a18to49",label:"18-49",col:C.teal,  v:Math.round((row.a18to49||0)*mod.w),  v30:row30?Math.round((row30.a18to49||0)*mod.w):null},
+    {key:"a50to64",label:"50-64",col:C.purple,v:Math.round((row.a50to64||0)*mod.p),  v30:row30?Math.round((row30.a50to64||0)*mod.p):null},
+    {key:"a65to79",label:"65-79",col:C.amber, v:Math.round((row.a65to79||0)*mod.s),  v30:row30?Math.round((row30.a65to79||0)*mod.s):null},
+    {key:"over80", label:"80+",  col:C.red,   v:Math.round((row.over80||0)*mod.e),   v30:row30?Math.round((row30.over80||0)*mod.e):null},
+  ];
+  const total  = bands.reduce((s,b)=>s+b.v,0)||row.total||1;
+  const a65    = bands[3].v+bands[4].v;
+  const a65pct = (a65/total*100).toFixed(1);
+  const totCagr= (row.total&&row30&&row30.total)?((Math.pow(row30.total/row.total,0.2)-1)*100):null;
+  const td = (regionData||[]).filter(d=>d.year<=2030).sort((a,b)=>a.year-b.year);
+  const W=280,H=52,pL=30,pR=6,pT=6,pB=18;
+  const tMin=Math.min(...td.map(d=>d.total||0));
+  const tMax=Math.max(...td.map(d=>d.total||1));
+  const tRng=tMax-tMin||1;
+  const tx=i=>pL+(i/Math.max(td.length-1,1))*(W-pL-pR);
+  const ty=v=>pT+(1-(v-tMin)/tRng)*(H-pT-pB);
+  const pts=td.map((d,i)=>tx(i).toFixed(1)+","+ty(d.total||0).toFixed(1)).join(" ");
+  const aPts=[tx(0).toFixed(1)+","+(H-pB),...td.map((d,i)=>tx(i).toFixed(1)+","+ty(d.total||0).toFixed(1)),tx(td.length-1).toFixed(1)+","+(H-pB)].join(" ");
+  const gid="rg-"+region.replace(/[^a-z0-9]/gi,"-");
+  return (
+    <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(11,31,58,0.12)",border:"1px solid "+C.border,scrollSnapAlign:"start",flexShrink:0,width:"calc(100vw - 24px)",maxWidth:390}}>
+      <div style={{background:"linear-gradient(135deg,"+C.navy+" 0%,#1A3A5C 100%)",padding:"12px 16px 10px",borderBottom:"3px solid "+color}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:22}}>{flag}</span>
+            <div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:"#fff",lineHeight:1}}>{region.toUpperCase()}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color,marginTop:2}}>POPULATION ANALYTICS · {selectedYear}</div>
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#fff",lineHeight:1}}>{fmt(row.total)}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:"rgba(255,255,255,0.55)"}}>TOTAL POPULATION</div>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+          {[{l:"65+ SHARE",v:a65pct+"%",c:parseFloat(a65pct)>18?C.red:C.amber},{l:"80+ POP",v:fmt(bands[4].v),c:"rgba(255,255,255,0.9)"},{l:"CAGR →30",v:totCagr!=null?(totCagr>0?"+":"")+totCagr.toFixed(2)+"%":"—",c:totCagr!=null&&totCagr>0?C.green:"#FF8A8A"}].map(m=>(
+            <div key={m.l} style={{textAlign:"center",background:"rgba(255,255,255,0.08)",borderRadius:8,padding:"6px 4px"}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:"rgba(255,255,255,0.55)",marginBottom:2}}>{m.l}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:15,color:m.c,letterSpacing:0.3,lineHeight:1}}>{m.v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{display:"flex",borderBottom:"1px solid "+C.border,background:"#F8FAFC"}}>
+        {["All","Male","Female"].map(s=>(
+          <button key={s} onClick={()=>setSex(s)} style={{flex:1,padding:"8px 0",border:"none",borderBottom:sex===s?"2px solid "+color:"2px solid transparent",background:"transparent",fontFamily:"'Bebas Neue',sans-serif",fontSize:12,letterSpacing:1.5,color:sex===s?C.navy:C.sub,cursor:"pointer"}}>{s.toUpperCase()}</button>
+        ))}
+      </div>
+      <div style={{padding:"8px 14px 0"}}>
+        <div style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,paddingBottom:5,borderBottom:"1px solid "+C.border}}>
+          {["BAND","POPULATION","SHARE","CAGR"].map(h=>(<div key={h} style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1.5,color:C.sub,textAlign:h==="BAND"?"left":"right"}}>{h}</div>))}
+        </div>
+        {bands.map(b=>{
+          const share=(b.v/total*100).toFixed(1);
+          const gr=(b.v&&b.v30)?((Math.pow(b.v30/b.v,0.2)-1)*100):null;
+          return (
+            <div key={b.key} style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,padding:"5px 0",borderBottom:"1px solid rgba(200,214,229,0.3)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:7,height:7,borderRadius:2,background:b.col,flexShrink:0}}/><span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy,letterSpacing:0.3}}>{b.label}</span></div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy,textAlign:"right"}}>{fmt(b.v)}</div>
+              <div style={{fontFamily:"system-ui",fontSize:11,color:C.sub,textAlign:"right"}}>{share}%</div>
+              <div style={{textAlign:"right"}}>{gr!=null&&<span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:gr>0?C.green:"#FF8A8A"}}>{gr>0?"+":""}{gr.toFixed(2)}%</span>}</div>
+            </div>
+          );
+        })}
+        <div style={{display:"grid",gridTemplateColumns:"2fr 2.5fr 1fr 1.5fr",gap:4,padding:"6px 0 8px",borderTop:"1.5px solid "+C.border}}>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy}}>TOTAL</div>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:12,color:C.navy,textAlign:"right"}}>{fmt(total)}</div>
+          <div style={{fontFamily:"system-ui",fontSize:11,color:C.sub,textAlign:"right"}}>100%</div>
+          <div style={{textAlign:"right"}}>{totCagr!=null&&<span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:11,color:totCagr>0?C.green:"#FF8A8A"}}>{totCagr>0?"+":""}{totCagr.toFixed(2)}%</span>}</div>
+        </div>
+      </div>
+      <div style={{borderTop:"1px solid "+C.border,padding:"8px 14px 12px",background:"#F8FAFC"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color:C.sub}}>POPULATION TREND 2005–2030</div>
+          {onZoom&&(<button onClick={()=>onZoom({title:region+" Population Trend",node:<TrendLine series={[{label:region,color,values:td.map(d=>d.total||0)}]} years={td.map(d=>d.year)} height={260} width={500} showLegend={false}/>})} style={{border:"1px solid "+C.border,background:"#fff",borderRadius:6,width:22,height:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:C.sub,padding:0}}>&#x2922;</button>)}
+        </div>
+        <svg width="100%" viewBox={"0 0 "+W+" "+H} style={{display:"block",overflow:"visible"}}>
+          <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.15"/><stop offset="100%" stopColor={color} stopOpacity="0.01"/></linearGradient></defs>
+          <polygon points={aPts} fill={"url(#"+gid+")"}/>
+          <text x={pL-3} y={pT+6} textAnchor="end" fontSize="7.5" fill={C.sub} fontFamily="system-ui">{fmt(tMax)}</text>
+          <text x={pL-3} y={H-pB+1} textAnchor="end" fontSize="7.5" fill={C.sub} fontFamily="system-ui">{fmt(tMin)}</text>
+          <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          {td.map((d,i)=>(<text key={d.year} x={tx(i)} y={H-1} textAnchor="middle" fontSize="7.5" fill={d.year===selectedYear?C.navy:C.sub} fontFamily="system-ui" fontWeight={d.year===selectedYear?"700":"400"}>{d.year}</text>))}
+          {td.map((d,i)=>d.year===selectedYear?(<circle key="sel" cx={tx(i)} cy={ty(d.total||0)} r="3" fill={color} stroke="#fff" strokeWidth="1.5"/>):null)}
+        </svg>
+      </div>
+    </div>
+  );
+}
 // ── DEMOGRAPHIC MAP (Mapbox GL) ─────────────────────────────────────────────
 // ── US STATE CENTROIDS (for map markers) ──────────────────────────────────
 const US_STATE_CENTROIDS = [
@@ -2649,6 +2752,14 @@ export default function PopulationDemographics() {
           </div>
         </div>
 
+
+        {/* ── SWIPEABLE REGION CARDS ── */}
+        <div style={{display:'flex',gap:12,overflowX:'auto',scrollSnapType:'x mandatory',WebkitOverflowScrolling:'touch',paddingBottom:8,msOverflowStyle:'none',scrollbarWidth:'none'}}>
+          {Object.entries(REGIONS).map(([r,rd])=>{
+            const rData = (rd.data||[]).map(d=>({...d,year:d.year||d.y})).filter(d=>d.year);
+            return <RegionCard key={r} region={r} regionData={rData} selectedYear={selectedYear} onZoom={openZoom}/>;
+          })}
+        </div>
         {/* ── REGION SUMMARY BANNER ── */}
         {regionNow && (
           <div style={{

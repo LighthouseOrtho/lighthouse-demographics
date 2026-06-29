@@ -1351,7 +1351,8 @@ function CountryProfileCard({ name, data, year, ageGroups, genderFilter, onSelec
 
   const mod = getAgeGroups(genderFilter);
   const u18_now  = Math.round(rowNow.under18 * mod.u18);
-  const w_now    = Math.round(rowNow.a18to49||0 * mod.w);
+  const w_now    = Math.round((rowNow.a18to49||0) * mod.w);
+  const p_now    = Math.round((rowNow.a50to64||0) * mod.p);
   const s_now    = Math.round(rowNow.a65to79 * mod.s);
   const e_now    = Math.round(rowNow.over80  * mod.e);
   const over65_now = s_now + e_now;

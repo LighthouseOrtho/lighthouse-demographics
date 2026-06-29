@@ -1798,11 +1798,11 @@ function RegionCard({ region, regionData, selectedYear, onZoom }) {
             <span style={{fontSize:22}}>{flag}</span>
             <div>
               <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:"#fff",lineHeight:1}}>{region.toUpperCase()}</div>
-              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color,marginTop:2}}>POPULATION ANALYTICS · {selectedYear}</div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:2,color,marginTop:2}}>POPULATION ANALYTICS · {selectedYear} · {sex.toUpperCase()}</div>
             </div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#fff",lineHeight:1}}>{fmt(row.total)}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,color:"#fff",lineHeight:1}}>{fmt(total)}</div>
             <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:9,letterSpacing:1,color:"rgba(255,255,255,0.9)"}}>TOTAL POPULATION · {selectedYear}</div>
           </div>
         </div>
